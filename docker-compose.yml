@@ -1,0 +1,42 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+services:
+  songmanager-app:
+    depends_on:
+      - songmanager
+    container_name: songmanager-app
+    build: 
+      context: ../WebApp/SongManagerApp
+      dockerfile: Dockerfile
+    ports:
+      - 8080:80
+    networks:
+      - songmanager-network
+
+  songmanager:
+    depends_on:
+      - songmanager.database
+    container_name: songmanager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+      - 5001:5001
+    networks:
+      - songmanager-network
+
+  songmanager.database:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: songmanager.database
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "nox1342Zm*1234"
+    ports:
+      - 5432:5432
+    networks:
+      - songmanager-network
+
+networks:
+  songmanager-network:
+    driver: bridge
