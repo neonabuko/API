@@ -17,15 +17,21 @@ public static class ServiceConfiguration
     IConfiguration configuration) 
     {
         var connectionString = configuration.GetConnectionString("SongManagerContext");
+        services.AddSingleton(configuration);
         services.AddSqlServer<SongManagerContext>(connectionString);
 
+        services.AddScoped<BlobStorageService>();
+        services.AddScoped<BlobContainerConfiguration>();
         services.AddScoped<SongRepository>();
 
         services.AddControllers();
-
         services.AddEndpointsApiExplorer();
-        
         services.AddSwaggerGen();
+
+        services.AddHttpsRedirection(options => 
+        {
+            options.HttpsPort = 7196;
+        });
 
         services.AddCors(options =>
         {

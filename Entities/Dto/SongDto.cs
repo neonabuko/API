@@ -1,5 +1,6 @@
 ﻿namespace SongManager;
 
 public record SongDto(
-    IFormFile File
+    string Name,
+    string Url
 );
