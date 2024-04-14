@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Repositories;
 
 namespace SongManager.Data;
@@ -28,10 +29,12 @@ public static class ServiceConfiguration
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
-        services.AddHttpsRedirection(options => 
-        {
-            options.HttpsPort = 7196;
-        });
+        // services.Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
+
+        // services.AddHttpsRedirection(options => 
+        // {
+        //     options.HttpsPort = 7196;
+        // });
 
         services.AddCors(options =>
         {
