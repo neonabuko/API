@@ -15,14 +15,19 @@ public class BlobStorageService
 
     private async Task SetContainerAccessAsync() => await _blobContainerClient.SetAccessPolicyAsync(PublicAccessType.Blob);
 
-    public async Task<string> UploadSongAsync(string filePath, string fileName)
+    public async Task<string> UploadSongAsync(IFormFile file, string fileName)
     {
+        string filePath = Path.GetTempFileName();
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
         var blobClient = _blobContainerClient.GetBlobClient(fileName);
         using (var fileStream = File.OpenRead(filePath))
         {
             await blobClient.UploadAsync(fileStream, true);
         }
-
+        File.Delete(filePath);
         return blobClient.Uri.ToString();
     }
 
@@ -44,5 +49,10 @@ public class BlobStorageService
         }
 
         return songs;
+    }
+
+    public async Task DeleteSongAsync(string name) {
+        var song = _blobContainerClient.GetBlobClient(name);
+        await song.DeleteIfExistsAsync();
     }
 }

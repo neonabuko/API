@@ -17,17 +17,15 @@ public class SongController(BlobStorageService blobStorageService) : ControllerB
     [HttpPost("/upload")]
     public async Task<IActionResult> Create([FromForm] IFormFile file)
     {
-        string filePath = Path.GetTempFileName();
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-
-        var blobUrl = await blobStorageService.UploadSongAsync(filePath, file.FileName);
-
-        System.IO.File.Delete(filePath);
-
+        var blobUrl = await blobStorageService.UploadSongAsync(file, file.FileName);
         return Ok(blobUrl);
+    }
+
+    [HttpDelete("/delete/{name}")]
+    public async Task<IActionResult> Delete(string name)
+    {
+        await blobStorageService.DeleteSongAsync(name);
+        return Ok();
     }
 }
 
