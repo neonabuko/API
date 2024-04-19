@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SongManager.Entities;
+﻿using SongManager.Entities;
 
 namespace SongManager;
 
 public static class EntityExtensions
 {
-    // public static SongDto AsDto(Song song)
-    // {
-    //     MemoryStream memoryStream = new(song.File);
-    //     FileStreamResult fileStreamResult = new(memoryStream, "audio/mpeg");
-    //     return new SongDto(
-    //         fileStreamResult
-    //     );
-    // }
+    public static SongDto AsDto(this Song song)
+    {
+        return new SongDto(
+            Name: song.Name,
+            Duration: song.Duration,
+            Url: song.Url,
+            Author: song.Author ?? ""
+        );
+    }
 
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Repositories;
 using Service;
 
 namespace SongManager;
@@ -11,28 +12,28 @@ public class SongController(SongService songService) : ControllerBase
 
 
     [HttpGet("/songs")]
-    public async Task<IEnumerable<SongDto>> GetAllSongsAsync() => await songService.GetAllSongsAsync();
+    public async Task<IEnumerable<SongDto>> GetAllSongsAsync() => await songService.GetAllAsync();
 
 
     [HttpGet("/songs/{songName}")]
     public IActionResult GetAsync(string songName)
     {
-        return songService.GetSongAsync(songName);
+        return songService.GetAsync(songName);
     }
 
 
     [HttpPost("/upload")]
-    public async Task<IActionResult> CreateAsync([FromForm] IFormFile file, [FromForm] string fileName)
+    public async Task<IActionResult> CreateAsync([FromForm] IFormFile file, [FromForm] string author)
     {
-        await songService.SaveFileAsync(file, fileName);
+        await songService.SaveToFileAsync(file, file.FileName, author);
         return Ok();
     }
 
 
     [HttpDelete("/delete/{songName}")]
-    public IActionResult Delete(string songName)
+    public async Task<IActionResult> Delete(string songName)
     {
-        songService.DeleteSong(songName);
+        await songService.Delete(songName);
         return Ok();
     }
 }

@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Repositories;
 using SongManager;
+using SongManager.Entities;
 
 namespace Service;
 
-public class SongService(IConfiguration configuration)
+public class SongService(IConfiguration configuration, SongRepository songRepository)
 {
     private readonly string _storagePath = configuration.GetValue<string>("StoragePath") ?? throw new NullReferenceException();
 
-    public async Task<string> SaveFileAsync(IFormFile file, string fileName)
+    public async Task<string> SaveToFileAsync(IFormFile file, string fileName, string author)
     {
         string filePath = Path.Combine(_storagePath, fileName);
 
@@ -15,11 +17,25 @@ public class SongService(IConfiguration configuration)
         {
             await file.CopyToAsync(stream);
         }
-
+        await SaveToRepositoryAsync(filePath, fileName, author);
         return fileName;
     }
 
-    public IActionResult GetSongAsync(string songName)
+    private async Task SaveToRepositoryAsync(string filePath, string fileName, string author)
+    {
+        using var fileTag = TagLib.File.Create(filePath);
+        TimeSpan duration = fileTag.Properties.Duration;
+        Song newSong = new()
+        {
+            Name = fileName,
+            Duration = duration,
+            Url = $"/songs/{fileName}",
+            Author = author
+        };
+        await songRepository.CreateAsync(newSong);
+    }
+
+    public IActionResult GetAsync(string songName)
     {
         string filePath = Path.Combine(_storagePath, songName);
 
@@ -27,32 +43,15 @@ public class SongService(IConfiguration configuration)
         return new FileStreamResult(fileStream, "audio/mpeg");
     }
 
-    public async Task<IEnumerable<SongDto>> GetAllSongsAsync()
+    public async Task<ICollection<SongDto>> GetAllAsync()
     {
-        string[] fileNames = Directory.GetFiles(_storagePath);
-
-        List<SongDto> songs = new List<SongDto>();
-
-        foreach (string fileName in fileNames)
-        {
-            string path = Path.Combine(_storagePath, fileName);
-
-            using var file = TagLib.File.Create(path);
-            TimeSpan duration = file.Properties.Duration;
-
-            songs.Add(new SongDto
-            (
-                Name: Path.GetFileName(fileName),
-                Duration: duration,
-                Url: $"/songs/{Path.GetFileName(fileName)}"
-            ));
-        }
-
-        return await Task.FromResult(songs);
+        var songs = await songRepository.GetAllAsync();
+        return songs.Select(s => s.AsDto()).ToList();
     }
 
-    public void DeleteSong(string songName)
+    public async Task Delete(string songName)
     {
+        await songRepository.DeleteAsync(songName);
         string filePath = Path.Combine(_storagePath, songName);
         File.Delete(filePath);
     }

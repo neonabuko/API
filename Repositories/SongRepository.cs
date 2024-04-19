@@ -19,4 +19,10 @@ public class SongRepository(SongManagerContext context)
         return await context.Set<Song>().FindAsync(id) ?? throw new NullReferenceException();
     }
 
+    public async Task<Song> GetByNameAsync(string name)
+    {
+        return await context.Set<Song>().Where(s => s.Name == name).FirstAsync();
+    }
+
+    public async Task DeleteAsync(string name) => await context.Set<Song>().Where(s => s.Name == name).ExecuteDeleteAsync();
 }
