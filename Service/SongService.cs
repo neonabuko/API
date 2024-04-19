@@ -49,10 +49,10 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         return songs.Select(s => s.AsDto()).ToList();
     }
 
-    public async Task Delete(string songName)
+    public async Task DeleteAsync(string songName)
     {
         await songRepository.DeleteAsync(songName);
         string filePath = Path.Combine(_storagePath, songName);
-        File.Delete(filePath);
+        if (File.Exists(filePath)) File.Delete(filePath);
     }
 }

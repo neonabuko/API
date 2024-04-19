@@ -24,5 +24,10 @@ public class SongRepository(SongManagerContext context)
         return await context.Set<Song>().Where(s => s.Name == name).FirstAsync();
     }
 
-    public async Task DeleteAsync(string name) => await context.Set<Song>().Where(s => s.Name == name).ExecuteDeleteAsync();
+    public async Task DeleteAsync(string name)
+    {
+        var toDelete = await GetByNameAsync(name) ?? throw new NullReferenceException(name + " not found in repository.");
+        context.Set<Song>().Remove(toDelete);
+        await context.SaveChangesAsync();
+    }
 }

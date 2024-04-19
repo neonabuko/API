@@ -33,7 +33,7 @@ public class SongController(SongService songService) : ControllerBase
     [HttpDelete("/delete/{songName}")]
     public async Task<IActionResult> Delete(string songName)
     {
-        await songService.Delete(songName);
+        await songService.DeleteAsync(songName);
         return Ok();
     }
 }
