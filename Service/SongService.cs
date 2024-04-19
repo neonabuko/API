@@ -9,7 +9,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 {
     private readonly string _storagePath = configuration.GetValue<string>("StoragePath") ?? throw new NullReferenceException();
 
-    public async Task<string> SaveToFileAsync(IFormFile file, string fileName, string author)
+    public async Task SaveToFileAsync(IFormFile file, string fileName, string author)
     {
         string filePath = Path.Combine(_storagePath, fileName);
 
@@ -18,7 +18,6 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
             await file.CopyToAsync(stream);
         }
         await SaveToRepositoryAsync(filePath, fileName, author);
-        return fileName;
     }
 
     private async Task SaveToRepositoryAsync(string filePath, string fileName, string author)
