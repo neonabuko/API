@@ -18,7 +18,8 @@ public class SongController(SongService songService) : ControllerBase
     [HttpGet("/songs/{songName}")]
     public IActionResult GetAsync(string songName)
     {
-        return songService.GetAsync(songName);
+        var file = songService.GetAsync(songName);
+        return new FileStreamResult(file, "audio/mpeg");
     }
 
 

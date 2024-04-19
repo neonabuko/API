@@ -34,12 +34,11 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         await songRepository.CreateAsync(newSong);
     }
 
-    public IActionResult GetAsync(string songName)
+    public FileStream GetAsync(string songName)
     {
         string filePath = Path.Combine(_storagePath, songName);
 
-        var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        return new FileStreamResult(fileStream, "audio/mpeg");
+        return new FileStream(filePath, FileMode.Open, FileAccess.Read);
     }
 
     public async Task<ICollection<SongDto>> GetAllAsync()
