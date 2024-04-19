@@ -1,30 +1,38 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SongManager.Data;
+using Service;
 
 namespace SongManager;
 
 [ApiController]
-public class SongController(BlobStorageService blobStorageService) : ControllerBase
+public class SongController(SongService songService) : ControllerBase
 {
     [HttpGet("/")]
     public IActionResult Index() => Ok();
 
 
     [HttpGet("/songs")]
-    public async Task<ICollection<SongDto>> GetAllSongs() => await blobStorageService.GetAllSongsAsync();
+    public async Task<IEnumerable<SongDto>> GetAllSongsAsync() => await songService.GetAllSongsAsync();
+
+
+    [HttpGet("/songs/{songName}")]
+    public IActionResult GetAsync(string songName)
+    {
+        return songService.GetSongAsync(songName);
+    }
 
 
     [HttpPost("/upload")]
-    public async Task<IActionResult> Create([FromForm] IFormFile file)
+    public async Task<IActionResult> CreateAsync([FromForm] IFormFile file, [FromForm] string fileName)
     {
-        var blobUrl = await blobStorageService.UploadSongAsync(file, file.FileName);
-        return Ok(blobUrl);
+        await songService.SaveFileAsync(file, fileName);
+        return Ok();
     }
 
-    [HttpDelete("/delete/{name}")]
-    public async Task<IActionResult> Delete(string name)
+
+    [HttpDelete("/delete/{songName}")]
+    public IActionResult Delete(string songName)
     {
-        await blobStorageService.DeleteSongAsync(name);
+        songService.DeleteSong(songName);
         return Ok();
     }
 }

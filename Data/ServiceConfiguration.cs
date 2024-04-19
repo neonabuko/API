@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Repositories;
+using Service;
 
 namespace SongManager.Data;
 
@@ -20,21 +22,13 @@ public static class ServiceConfiguration
         var connectionString = configuration.GetConnectionString("SongManagerContext");
         services.AddSingleton(configuration);
         services.AddSqlServer<SongManagerContext>(connectionString);
-
-        services.AddScoped<BlobStorageService>();
-        services.AddScoped<BlobContainerConfiguration>();
+        
         services.AddScoped<SongRepository>();
+        services.AddScoped<SongService>();
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-
-        // services.Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
-
-        // services.AddHttpsRedirection(options => 
-        // {
-        //     options.HttpsPort = 7196;
-        // });
 
         services.AddCors(options =>
         {

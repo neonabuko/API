@@ -12,7 +12,6 @@ RUN dotnet publish "./SongManager.csproj" -c release -o /app --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 COPY --from=build /app .
-COPY ./DomainConfig/ /app
 
 USER app
 EXPOSE 5000
