@@ -13,7 +13,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 COPY --from=build /app .
 
-USER app
+USER root
 EXPOSE 5000
 EXPOSE 7196
 
