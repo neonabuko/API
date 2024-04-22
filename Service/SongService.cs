@@ -34,7 +34,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         await songRepository.CreateAsync(newSong);
     }
 
-    public FileStream GetSongFileAsync(string name)
+    public FileStream GetSongFileStream(string name)
     {
         string path = Path.Combine(_storagePath, name);
         var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
