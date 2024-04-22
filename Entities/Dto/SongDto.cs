@@ -1,8 +1,6 @@
 ﻿namespace SongManager;
 
 public record SongDto(
-    string Name,
-    TimeSpan Duration,
-    string Url,
-    string Author
+    IFormFile File,
+    string? Author
 );

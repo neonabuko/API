@@ -12,21 +12,21 @@ public class SongController(SongService songService) : ControllerBase
 
 
     [HttpGet("/songs")]
-    public async Task<IEnumerable<SongDto>> GetAllSongsAsync() => await songService.GetAllAsync();
+    public async Task<ICollection<SongViewDto>> GetAllSongDataAsync() => await songService.GetAllSongData();
 
 
     [HttpGet("/songs/{songName}")]
-    public IActionResult GetAsync(string songName)
+    public IActionResult GetSongFileAsync(string songName)
     {
-        var file = songService.GetAsync(songName);
+        var file = songService.GetSongFileAsync(songName);
         return new FileStreamResult(file, "audio/mpeg");
     }
 
 
     [HttpPost("/upload")]
-    public async Task<IActionResult> CreateAsync([FromForm] IFormFile file, [FromForm] string author)
+    public async Task<IActionResult> CreateAsync([FromForm] SongDto songDto)
     {
-        await songService.SaveToFileAsync(file, file.FileName, author);
+        await songService.SaveSongAsync(songDto);
         return Ok();
     }
 

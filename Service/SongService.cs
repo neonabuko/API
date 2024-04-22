@@ -9,15 +9,15 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 {
     private readonly string _storagePath = configuration.GetValue<string>("StoragePath") ?? throw new NullReferenceException();
 
-    public async Task SaveToFileAsync(IFormFile file, string fileName, string author)
+    public async Task SaveSongAsync(SongDto songDto)
     {
-        string filePath = Path.Combine(_storagePath, fileName);
+        string filePath = Path.Combine(_storagePath, songDto.File.FileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
-            await file.CopyToAsync(stream);
+            await songDto.File.CopyToAsync(stream);
         }
-        await SaveToRepositoryAsync(filePath, fileName, author);
+        await SaveToRepositoryAsync(filePath, songDto.File.FileName, songDto.Author ?? "");
     }
 
     private async Task SaveToRepositoryAsync(string filePath, string fileName, string author)
@@ -34,17 +34,23 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         await songRepository.CreateAsync(newSong);
     }
 
-    public FileStream GetAsync(string songName)
+    public FileStream GetSongFileAsync(string name)
     {
-        string filePath = Path.Combine(_storagePath, songName);
-
-        return new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        string path = Path.Combine(_storagePath, name);
+        var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+        return fileStream;
     }
 
-    public async Task<ICollection<SongDto>> GetAllAsync()
+    public async Task<SongViewDto> GetSongDataAsync(string name)
+    {
+        var song = await songRepository.GetByNameAsync(name);
+        return song.AsViewDto();
+    }
+
+    public async Task<ICollection<SongViewDto>> GetAllSongData()
     {
         var songs = await songRepository.GetAllAsync();
-        return songs.Select(s => s.AsDto()).ToList();
+        return songs.Select(s => s.AsViewDto()).ToList();
     }
 
     public async Task DeleteAsync(string songName)

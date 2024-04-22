@@ -12,16 +12,6 @@ app.UseSwaggerUI();
 
 app.UseRouting();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    ContentTypeProvider = new FileExtensionContentTypeProvider
-    {
-        Mappings = {
-            [".mp3"] = "audio/mpeg"
-        }
-    }
-});
-
 app.MapControllerRoute(
     "default",
     "{controller=Home}/{action=Index}/{id?}"
