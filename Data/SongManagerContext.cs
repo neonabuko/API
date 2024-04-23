@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 using SongManager.Entities;
 
@@ -10,5 +11,6 @@ public class SongManagerContext(DbContextOptions<SongManagerContext> options) : 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfiguration(new SongConfiguration());
     }
 }

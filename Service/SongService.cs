@@ -44,7 +44,14 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 
     public async Task DeleteAsync(string songName)
     {
-        await songRepository.DeleteAsync(songName);
+        try
+        {
+            await songRepository.DeleteAsync(songName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
         string filePath = Path.Combine(_storagePath, songName);
         if (File.Exists(filePath)) File.Delete(filePath);
     }

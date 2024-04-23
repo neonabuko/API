@@ -26,12 +26,14 @@ public class ChunkService
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
         var outputFilePath = Path.Combine(_songDir + $"/{fileIdentifier}");
-        using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
+        await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         foreach (var chunkFilePath in chunkFileNames)
         {
-            using var chunkFileStream = new FileStream(chunkFilePath, FileMode.Open, FileAccess.Read);
+            await using var chunkFileStream = new FileStream(chunkFilePath, FileMode.Open, FileAccess.Read);
             await chunkFileStream.CopyToAsync(outputFileStream);
+            Console.WriteLine(chunkFilePath);
         }
+        await DeleteTempChunksAsync(fileIdentifier, totalChunks);
     }
 
     public async Task DeleteTempChunksAsync(string fileIdentifier, int totalChunks)
@@ -51,6 +53,6 @@ public class ChunkService
 
     private string GetChunkFilePath(string fileIdentifier, int chunkNumber)
     {
-        return Path.Combine(_tempDirectory, $"{fileIdentifier}_chunk_{chunkNumber}.tmp");
+        return Path.Combine(_tempDirectory, $"{fileIdentifier}_chunk_{chunkNumber:D2}.tmp");
     }
 }
