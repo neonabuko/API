@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using Repositories;
-using SongManager;
 using SongManager.Entities;
+using SongManager.Entities.Dto;
+using SongManager.Entities.Extensions;
 
 namespace Service;
 
@@ -9,27 +9,16 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 {
     private readonly string _storagePath = configuration.GetValue<string>("StoragePath") ?? throw new NullReferenceException();
 
-    public async Task SaveSongAsync(SongDto songDto)
+    public async Task SaveToRepositoryAsync(SongDto songDto)
     {
-        string filePath = Path.Combine(_storagePath, songDto.File.FileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await songDto.File.CopyToAsync(stream);
-        }
-        await SaveToRepositoryAsync(filePath, songDto.File.FileName, songDto.Author ?? "");
-    }
-
-    private async Task SaveToRepositoryAsync(string filePath, string fileName, string author)
-    {
+        var filePath = _storagePath + $"/{songDto.Name}";
         using var fileTag = TagLib.File.Create(filePath);
         TimeSpan duration = fileTag.Properties.Duration;
         Song newSong = new()
         {
-            Name = fileName,
+            Name = songDto.Name,
             Duration = duration,
-            Url = $"/songs/{fileName}",
-            Author = author
+            Author = songDto.Author
         };
         await songRepository.CreateAsync(newSong);
     }

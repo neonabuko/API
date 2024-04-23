@@ -25,6 +25,7 @@ public static class ServiceConfiguration
         
         services.AddScoped<SongRepository>();
         services.AddScoped<SongService>();
+        services.AddScoped<ChunkService>();
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();

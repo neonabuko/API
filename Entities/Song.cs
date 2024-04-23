@@ -8,6 +8,5 @@ public class Song
     [StringLength(70)]
     public required string Name { get; set; }
     public TimeSpan Duration { get; set; }
-    public required string Url { get; set; }
     public string? Author { get; set; }
 }

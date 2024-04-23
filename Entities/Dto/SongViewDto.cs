@@ -1,4 +1,4 @@
-namespace SongManager;
+namespace SongManager.Entities.Dto;
 
 public record SongViewDto(
     string Name,

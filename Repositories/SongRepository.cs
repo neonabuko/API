@@ -1,15 +1,24 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SongManager;
 using SongManager.Entities;
 
 namespace Repositories;
 
-public class SongRepository(SongManagerContext context) 
+public class SongRepository(SongManagerContext context)
 {
     public async Task CreateAsync(Song song)
     {
-        await context.AddAsync(song);
-        await context.SaveChangesAsync();
+        try
+        {
+            await GetByNameAsync(song.Name);
+            throw new Exception("Song with same name already exists in repository.");
+        }
+        catch (NullReferenceException)
+        {
+            await context.AddAsync(song);
+            await context.SaveChangesAsync();            
+        }
     }
 
     public async Task<ICollection<Song>> GetAllAsync() => await context.Set<Song>().ToListAsync();
@@ -21,12 +30,13 @@ public class SongRepository(SongManagerContext context)
 
     public async Task<Song> GetByNameAsync(string name)
     {
-        return await context.Set<Song>().Where(s => s.Name == name).FirstAsync();
+        return await context.Set<Song>().FirstOrDefaultAsync(s => s.Name == name) ?? 
+        throw new NullReferenceException(name + " not found in repository");
     }
 
     public async Task DeleteAsync(string name)
     {
-        var toDelete = await GetByNameAsync(name) ?? throw new NullReferenceException(name + " not found in repository.");
+        var toDelete = await GetByNameAsync(name);
         context.Set<Song>().Remove(toDelete);
         await context.SaveChangesAsync();
     }

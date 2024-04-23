@@ -1,6 +1,6 @@
-﻿namespace SongManager;
+﻿namespace SongManager.Entities.Dto;
 
 public record SongDto(
-    IFormFile File,
+    string Name,
     string? Author
 );

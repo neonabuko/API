@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SongManager.Entities;
+﻿using SongManager.Entities.Dto;
 
-namespace SongManager;
+namespace SongManager.Entities.Extensions;
 
 public static class EntityExtensions
 {
