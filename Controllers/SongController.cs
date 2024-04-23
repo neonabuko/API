@@ -37,9 +37,9 @@ public class SongController(SongService songService, ChunkService chunkService) 
         try
         {
             await songService.GetSongDataAsync(chunkDto.Name);
-            throw new Exception("Song already exists.");
+            throw new InvalidOperationException("Song already exists.");
         }
-        catch (Exception){}
+        catch (NullReferenceException){}
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks)) {
             await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
