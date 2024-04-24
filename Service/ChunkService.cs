@@ -31,9 +31,7 @@ public class ChunkService
         {
             await using var chunkFileStream = new FileStream(chunkFilePath, FileMode.Open, FileAccess.Read);
             await chunkFileStream.CopyToAsync(outputFileStream);
-            Console.WriteLine(chunkFilePath);
         }
-        await DeleteTempChunksAsync(fileIdentifier, totalChunks);
     }
 
     public async Task DeleteTempChunksAsync(string fileIdentifier, int totalChunks)

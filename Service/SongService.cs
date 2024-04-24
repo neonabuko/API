@@ -11,13 +11,10 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 
     public async Task SaveToRepositoryAsync(SongDto songDto)
     {
-        var filePath = _storagePath + $"/{songDto.Name}";
-        using var fileTag = TagLib.File.Create(filePath);
-        TimeSpan duration = fileTag.Properties.Duration;
         Song newSong = new()
         {
             Name = songDto.Name,
-            Duration = duration,
+            Duration = songDto.Duration,
             Author = songDto.Author
         };
         await songRepository.CreateAsync(newSong);

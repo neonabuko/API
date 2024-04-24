@@ -43,6 +43,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks)) {
             await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
+            await chunkService.DeleteTempChunksAsync(chunkDto.Name, chunkDto.TotalChunks);
         }
         return Ok();
     }
