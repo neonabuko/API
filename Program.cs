@@ -7,17 +7,22 @@ builder.Services.ConfigureServices(builder.Configuration);
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
 
+app.UseCors("AllowAllOrigins");
+
 app.MapControllerRoute(
     "default",
     "{controller=Home}/{action=Index}/{id?}"
     );
-
-app.UseCors("AllowAllOrigins");
 
 await app.Services.InitializeDbAsync();
 

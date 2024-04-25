@@ -27,10 +27,6 @@ public static class ServiceConfiguration
         services.AddScoped<SongService>();
         services.AddScoped<ChunkService>();
 
-        services.AddControllers();
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
-
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAllOrigins", builder =>
@@ -40,6 +36,11 @@ public static class ServiceConfiguration
                     .AllowAnyMethod();
             });
         });
+
+        services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
         return services;
     }
 
