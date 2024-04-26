@@ -9,4 +9,5 @@ public class Song
     public required string Name { get; set; }
     public TimeSpan Duration { get; set; }
     public string? Author { get; set; }
+    public int Bitrate { get; set; }
 }

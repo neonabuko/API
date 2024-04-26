@@ -15,7 +15,8 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         {
             Name = songDto.Name,
             Duration = songDto.Duration,
-            Author = songDto.Author
+            Author = songDto.Author,
+            Bitrate = songDto.Bitrate
         };
         await songRepository.CreateAsync(newSong);
     }

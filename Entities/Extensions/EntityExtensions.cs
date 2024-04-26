@@ -8,7 +8,8 @@ public static class EntityExtensions
         return new SongViewDto(
             song.Name,
             song.Author,
-            song.Duration
+            song.Duration,
+            song.Bitrate
         );
     }
 

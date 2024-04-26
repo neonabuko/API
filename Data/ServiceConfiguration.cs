@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using Repositories;
 using Service;
 
@@ -11,7 +9,7 @@ public static class ServiceConfiguration
 
     public static async Task InitializeDbAsync(this IServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateScope();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<SongManagerContext>();
         await dbContext.Database.MigrateAsync();
     } 

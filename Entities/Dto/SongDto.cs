@@ -3,5 +3,6 @@
 public record SongDto(
     string Name,
     string? Author,
-    TimeSpan Duration
+    TimeSpan Duration,
+    int Bitrate
 );

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Repositories;
 using Service;
 using SongManager.Entities.Dto;
 
@@ -19,9 +18,49 @@ public class SongController(SongService songService, ChunkService chunkService) 
     [HttpGet("/songs/{songName}")]
     public IActionResult GetSongFileAsync(string songName)
     {
-        var file = songService.GetSongFileStream(songName);
-        return new FileStreamResult(file, "audio/mpeg");
+        var fileStream = songService.GetSongFileStream(songName);
+        if (fileStream == null)
+        {
+            return NotFound();
+        }
+
+        long fileSize = fileStream.Length;
+
+        if (Request.Headers.TryGetValue("Range", out var rangeValues))
+        {
+            var rangeHeader = rangeValues.FirstOrDefault();
+
+            if (rangeHeader != null && rangeHeader.StartsWith("bytes="))
+            {
+                var rangeParts = rangeHeader[6..].Split('-');
+                long startByte = long.Parse(rangeParts[0]);
+                long endByte = (rangeParts.Length > 1 && !string.IsNullOrWhiteSpace(rangeParts[1]))
+                                ? long.Parse(rangeParts[1])
+                                : fileSize - 1;
+
+                var responseLength = endByte - startByte + 1;
+
+                fileStream.Seek(startByte, SeekOrigin.Begin);
+
+                var responseStream = new FileStreamResult(fileStream, "audio/mpeg")
+                {
+                    EnableRangeProcessing = true
+                };
+
+                Response.StatusCode = 206;
+                Response.Headers.ContentRange = $"bytes {startByte}-{endByte}/{fileSize}";
+                Response.Headers["Content-Length"] = responseLength.ToString();
+
+                return responseStream;
+            }
+        }
+
+        return new FileStreamResult(fileStream, "audio/mpeg")
+        {
+            EnableRangeProcessing = true
+        };
     }
+
 
 
     [HttpPost("/upload")]
@@ -37,15 +76,17 @@ public class SongController(SongService songService, ChunkService chunkService) 
         try
         {
             await songService.GetSongDataAsync(chunkDto.Name);
-            throw new InvalidOperationException("Song already exists.");
+            return StatusCode(409, "Song already exists.");
         }
-        catch (NullReferenceException){}
+        catch (NullReferenceException) { }
+
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.Data);
-        if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks)) {
-            await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
-            await chunkService.DeleteTempChunksAsync(chunkDto.Name, chunkDto.TotalChunks);
+        if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
+        {
+            var bitrate = await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
+            return Ok(new { Bitrate = bitrate });
         }
-        return Ok();
+        return StatusCode(202, "Stored chunk " + chunkDto.Id);
     }
 
 

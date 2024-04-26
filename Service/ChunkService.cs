@@ -19,7 +19,7 @@ public class ChunkService
         return await Task.Run(() => chunkFileNames.All(File.Exists));
     }
 
-    public async Task ReconstructFileAsync(string fileIdentifier, int totalChunks)
+    public async Task<int> ReconstructFileAsync(string fileIdentifier, int totalChunks)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
                                         .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber))
@@ -32,6 +32,11 @@ public class ChunkService
             await using var chunkFileStream = new FileStream(chunkFilePath, FileMode.Open, FileAccess.Read);
             await chunkFileStream.CopyToAsync(outputFileStream);
         }
+        await DeleteTempChunksAsync(fileIdentifier, totalChunks);
+        
+        var tagFile = TagLib.File.Create(outputFilePath);
+        var bitrate = tagFile.Properties.AudioBitrate;
+        return bitrate;
     }
 
     public async Task DeleteTempChunksAsync(string fileIdentifier, int totalChunks)
