@@ -36,14 +36,14 @@ public class SongRepository(SongManagerContext context)
 
     public async Task UpdateAsync(SongEditDto songEditDto, string name)
     {
-        var songInRepo = await GetByNameAsync(name) 
-        ?? throw new KeyNotFoundException($"Song with name '{name}' not found.");
+        var songInRepo = await GetByNameAsync(name);
 
-        songInRepo.Title = songEditDto.Title ?? songInRepo.Title;
+        songInRepo.Title = songEditDto.Title ?? throw new ArgumentException("Must provide song title");
         songInRepo.Author = songEditDto.Author ?? songInRepo.Author;
 
         try
         {
+            context.Set<Song>().Update(songInRepo);
             await context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)

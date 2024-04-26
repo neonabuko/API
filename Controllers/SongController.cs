@@ -13,7 +13,14 @@ public class SongController(SongService songService, ChunkService chunkService) 
 
 
     [HttpGet("/songs")]
-    public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongData();
+    public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongDataAsync();
+
+    [HttpGet("/songs/data/{songName}")]
+    public async Task<IActionResult> GetSongAsync(string songName)
+    {
+        var song = await songService.GetSongDataAsync(songName);
+        return Ok(song);
+    }
 
 
     [HttpGet("/songs/{songName}")]
@@ -90,7 +97,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
 
 
     [HttpPatch("/songs")]
-    public async Task<IActionResult> UpdateAsync(SongEditDto songEditDto, [FromQuery] string name)
+    public async Task<IActionResult> UpdateAsync([FromForm] SongEditDto songEditDto, [FromQuery] string name)
     {
         try
         {
@@ -100,7 +107,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
         {
             return StatusCode(404, e);
         }
-        catch (DBConcurrencyException e)
+        catch (InvalidOperationException e)
         {
             return StatusCode(500, e);
         }

@@ -35,7 +35,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         return song.AsViewDto();
     }
 
-    public async Task<ICollection<SongDto>> GetAllSongData()
+    public async Task<ICollection<SongDto>> GetAllSongDataAsync()
     {
         var songs = await songRepository.GetAllAsync();
         return songs.Select(s => s.AsViewDto()).ToList();
