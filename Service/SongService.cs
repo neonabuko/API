@@ -14,6 +14,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         Song newSong = new()
         {
             Name = songDto.Name,
+            Title = songDto.Title ?? songDto.Name,
             Duration = songDto.Duration,
             Author = songDto.Author,
             Bitrate = songDto.Bitrate
@@ -28,16 +29,20 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         return fileStream;
     }
 
-    public async Task<SongViewDto> GetSongDataAsync(string name)
+    public async Task<SongDto> GetSongDataAsync(string name)
     {
         var song = await songRepository.GetByNameAsync(name);
         return song.AsViewDto();
     }
 
-    public async Task<ICollection<SongViewDto>> GetAllSongData()
+    public async Task<ICollection<SongDto>> GetAllSongData()
     {
         var songs = await songRepository.GetAllAsync();
         return songs.Select(s => s.AsViewDto()).ToList();
+    }
+
+    public async Task UpdateSongDataAsync(SongEditDto songEditDto, string name) {
+        await songRepository.UpdateAsync(songEditDto, name);
     }
 
     public async Task DeleteAsync(string songName)
@@ -54,3 +59,5 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         if (File.Exists(filePath)) File.Delete(filePath);
     }
 }
+
+

@@ -4,9 +4,10 @@ namespace SongManager.Entities.Extensions;
 
 public static class EntityExtensions
 {
-    public static SongViewDto AsViewDto(this Song song) {
-        return new SongViewDto(
+    public static SongDto AsViewDto(this Song song) {
+        return new SongDto(
             song.Name,
+            song.Title,
             song.Author,
             song.Duration,
             song.Bitrate

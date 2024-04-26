@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Service;
 using SongManager.Entities.Dto;
 
@@ -12,7 +13,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
 
 
     [HttpGet("/songs")]
-    public async Task<ICollection<SongViewDto>> GetAllSongDataAsync() => await songService.GetAllSongData();
+    public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongData();
 
 
     [HttpGet("/songs/{songName}")]
@@ -61,8 +62,6 @@ public class SongController(SongService songService, ChunkService chunkService) 
         };
     }
 
-
-
     [HttpPost("/upload")]
     public async Task<IActionResult> CreateAsync([FromForm] SongDto songDto)
     {
@@ -89,6 +88,24 @@ public class SongController(SongService songService, ChunkService chunkService) 
         return StatusCode(202, "Stored chunk " + chunkDto.Id);
     }
 
+
+    [HttpPatch("/songs")]
+    public async Task<IActionResult> UpdateAsync(SongEditDto songEditDto, [FromQuery] string name)
+    {
+        try
+        {
+            await songService.UpdateSongDataAsync(songEditDto, name);
+        }
+        catch (NullReferenceException e)
+        {
+            return StatusCode(404, e);
+        }
+        catch (DBConcurrencyException e)
+        {
+            return StatusCode(500, e);
+        }
+        return Ok();
+    }
 
     [HttpDelete("/delete/{songName}")]
     public async Task<IActionResult> Delete(string songName)

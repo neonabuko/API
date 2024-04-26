@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SongManager;
 using SongManager.Entities;
+using SongManager.Entities.Dto;
 
 namespace Repositories;
 
@@ -16,7 +17,7 @@ public class SongRepository(SongManagerContext context)
         catch (NullReferenceException)
         {
             await context.AddAsync(song);
-            await context.SaveChangesAsync();            
+            await context.SaveChangesAsync();
         }
     }
 
@@ -29,9 +30,28 @@ public class SongRepository(SongManagerContext context)
 
     public async Task<Song> GetByNameAsync(string name)
     {
-        return await context.Set<Song>().FirstOrDefaultAsync(s => s.Name == name) ?? 
+        return await context.Set<Song>().FirstOrDefaultAsync(s => s.Name == name) ??
         throw new NullReferenceException(name + " not found in repository");
     }
+
+    public async Task UpdateAsync(SongEditDto songEditDto, string name)
+    {
+        var songInRepo = await GetByNameAsync(name) 
+        ?? throw new KeyNotFoundException($"Song with name '{name}' not found.");
+
+        songInRepo.Title = songEditDto.Title ?? songInRepo.Title;
+        songInRepo.Author = songEditDto.Author ?? songInRepo.Author;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new InvalidOperationException("Failed to update the song due to concurrency issues.", ex);
+        }
+    }
+
 
     public async Task DeleteAsync(string name)
     {
