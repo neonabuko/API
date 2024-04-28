@@ -12,7 +12,7 @@ public class SongRepository(SongManagerContext context)
         try
         {
             await GetByNameAsync(song.Name);
-            throw new Exception("Song with same name already exists in repository.");
+            throw new InvalidOperationException("Song with same name already exists in repository.");
         }
         catch (NullReferenceException)
         {

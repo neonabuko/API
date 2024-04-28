@@ -5,24 +5,24 @@ public class ChunkService
     private readonly string _tempDirectory = "/app/songs/tmp";
     private readonly string _songDir = "/app/songs";
 
-    public async Task StoreChunkAsync(string fileIdentifier, int chunkNumber, IFormFile chunkData)
+    public async Task StoreChunkAsync(string fileIdentifier, int chunkNumber, int totalChunks, IFormFile chunkData)
     {
-        string chunkFilePath = GetChunkFilePath(fileIdentifier, chunkNumber);
-        using var fileStream = new FileStream(chunkFilePath, FileMode.Create, FileAccess.Write);
+        string chunkFilePath = GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks);
+        await using var fileStream = new FileStream(chunkFilePath, FileMode.Create, FileAccess.Write);
         await chunkData.CopyToAsync(fileStream);
     }
 
     public async Task<bool> IsFileCompleteAsync(string fileIdentifier, int totalChunks)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
-                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber));
+                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks));
         return await Task.Run(() => chunkFileNames.All(File.Exists));
     }
 
     public async Task<int> ReconstructFileAsync(string fileIdentifier, int totalChunks)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
-                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber))
+                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks))
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
         var outputFilePath = Path.Combine(_songDir + $"/{fileIdentifier}");
@@ -33,16 +33,15 @@ public class ChunkService
             await chunkFileStream.CopyToAsync(outputFileStream);
         }
         await DeleteTempChunksAsync(fileIdentifier, totalChunks);
-        
+
         var tagFile = TagLib.File.Create(outputFilePath);
-        var bitrate = tagFile.Properties.AudioBitrate;
-        return bitrate;
+        return tagFile.Properties.AudioBitrate;
     }
 
     public async Task DeleteTempChunksAsync(string fileIdentifier, int totalChunks)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
-                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber))
+                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks))
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
         foreach (var chunkFileName in chunkFileNames)
@@ -54,8 +53,12 @@ public class ChunkService
         }
     }
 
-    private string GetChunkFilePath(string fileIdentifier, int chunkNumber)
+    private string GetChunkFilePath(string fileIdentifier, int chunkNumber, int totalChunks)
     {
-        return Path.Combine(_tempDirectory, $"{fileIdentifier}_chunk_{chunkNumber:D2}.tmp");
+        int numberOfDigits = totalChunks.ToString().Length;
+
+        string paddedChunkNumber = chunkNumber.ToString($"D{numberOfDigits}");
+        return Path.Combine(_tempDirectory, $"{fileIdentifier}_chunk_{paddedChunkNumber}.tmp");
     }
+
 }

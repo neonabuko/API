@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Service;
 using SongManager.Entities.Dto;
 
@@ -82,11 +81,14 @@ public class SongController(SongService songService, ChunkService chunkService) 
         try
         {
             await songService.GetSongDataAsync(chunkDto.Name);
+        }
+        catch (InvalidOperationException) 
+        {
             return StatusCode(409, "Song already exists.");
         }
         catch (NullReferenceException) { }
 
-        await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.Data);
+        await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
         {
             var bitrate = await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);

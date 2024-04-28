@@ -7,7 +7,7 @@ namespace Service;
 
 public class SongService(IConfiguration configuration, SongRepository songRepository)
 {
-    private readonly string _storagePath = configuration.GetValue<string>("StoragePath") ?? throw new NullReferenceException();
+    private readonly string _songsPath = configuration.GetValue<string>("SongsPath") ?? throw new NullReferenceException();
 
     public async Task SaveToRepositoryAsync(SongDto songDto)
     {
@@ -24,7 +24,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
 
     public FileStream GetSongFileStream(string name)
     {
-        string path = Path.Combine(_storagePath, name);
+        string path = Path.Combine(_songsPath, name);
         var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
         return fileStream;
     }
@@ -55,7 +55,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         {
             Console.WriteLine(e);
         }
-        string filePath = Path.Combine(_storagePath, songName);
+        string filePath = Path.Combine(_songsPath, songName);
         if (File.Exists(filePath)) File.Delete(filePath);
     }
 }
