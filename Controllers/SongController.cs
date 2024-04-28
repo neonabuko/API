@@ -23,7 +23,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
 
 
     [HttpGet("/songs/{songName}")]
-    public IActionResult GetSongFileAsync(string songName)
+    public IActionResult StreamSongAsync(string songName)
     {
         var fileStream = songService.GetSongFileStream(songName);
         if (fileStream == null)
@@ -69,24 +69,21 @@ public class SongController(SongService songService, ChunkService chunkService) 
     }
 
     [HttpPost("/upload")]
-    public async Task<IActionResult> CreateAsync([FromForm] SongDto songDto)
+    public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
     {
         await songService.SaveToRepositoryAsync(songDto);
         return Ok();
     }
 
     [HttpPost("/uploadChunk")]
-    public async Task<IActionResult> CreateChunkAsync([FromForm] ChunkDto chunkDto)
+    public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
     {
         try
         {
             await songService.GetSongDataAsync(chunkDto.Name);
-        }
-        catch (InvalidOperationException) 
-        {
             return StatusCode(409, "Song already exists.");
         }
-        catch (NullReferenceException) { }
+        catch (NullReferenceException) { } // Means song doesn't exist yet in repository so we can save it
 
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
@@ -99,7 +96,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
 
 
     [HttpPatch("/songs")]
-    public async Task<IActionResult> UpdateAsync([FromForm] SongEditDto songEditDto, [FromQuery] string name)
+    public async Task<IActionResult> UpdateSongDataAsync([FromForm] SongEditDto songEditDto, [FromQuery] string name)
     {
         try
         {
@@ -117,7 +114,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
     }
 
     [HttpDelete("/delete/{songName}")]
-    public async Task<IActionResult> Delete(string songName)
+    public async Task<IActionResult> DeleteSongAsync(string songName)
     {
         await songService.DeleteAsync(songName);
         return Ok();
