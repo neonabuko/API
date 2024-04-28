@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SongManager;
+using SongManager.Data;
 using SongManager.Entities;
 using SongManager.Entities.Dto;
 
@@ -51,7 +51,6 @@ public class SongRepository(SongManagerContext context)
             throw new InvalidOperationException("Failed to update the song due to concurrency issues.", ex);
         }
     }
-
 
     public async Task DeleteAsync(string name)
     {

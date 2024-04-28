@@ -2,7 +2,7 @@
 using Service;
 using SongManager.Entities.Dto;
 
-namespace SongManager;
+namespace SongManager.Controllers;
 
 [ApiController]
 public class SongController(SongService songService, ChunkService chunkService) : ControllerBase
@@ -14,7 +14,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
     [HttpGet("/songs")]
     public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongDataAsync();
 
-    [HttpGet("/songs/data/{songName}")]
+    [HttpGet("/songs/{songName}/data")]
     public async Task<IActionResult> GetSongAsync(string songName)
     {
         var song = await songService.GetSongDataAsync(songName);
@@ -68,14 +68,14 @@ public class SongController(SongService songService, ChunkService chunkService) 
         };
     }
 
-    [HttpPost("/upload")]
+    [HttpPost("/songs")]
     public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
     {
         await songService.SaveToRepositoryAsync(songDto);
         return Ok();
     }
 
-    [HttpPost("/uploadChunk")]
+    [HttpPost("/songs/uploadChunk")]
     public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
     {
         try
@@ -113,7 +113,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
         return Ok();
     }
 
-    [HttpDelete("/delete/{songName}")]
+    [HttpDelete("/songs/{songName}")]
     public async Task<IActionResult> DeleteSongAsync(string songName)
     {
         await songService.DeleteAsync(songName);

@@ -22,6 +22,7 @@ public static class ServiceConfiguration
         services.AddSqlServer<SongManagerContext>(connectionString);
         
         services.AddScoped<SongRepository>();
+        services.AddScoped<ScoreRepository>();
         services.AddScoped<SongService>();
         services.AddScoped<ChunkService>();
 
