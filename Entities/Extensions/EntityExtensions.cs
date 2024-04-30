@@ -19,6 +19,7 @@ public static class EntityExtensions
     {
         return new ScoreDto(
             score.Name,
+            score.Title,
             score.Author
         );
     }

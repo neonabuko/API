@@ -9,7 +9,7 @@ namespace SongManager.Controllers;
 [ApiController]
 public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
 {
-    [HttpGet("/scores")]
+    [HttpGet("/scores/data")]
     public async Task<IActionResult> GetAllScoreDataAsync()
     {
         var scores = await scoreRepository.GetAllAsync();
@@ -29,6 +29,7 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         Score score = new()
         {
             Name = scoreDto.Name,
+            Title = scoreDto.Title,
             Author = scoreDto.Author
         };
 
@@ -63,8 +64,11 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
     [HttpDelete("/scores/{name}")]
     public IActionResult DeleteScoreFileAsync(string name)
     {
-        var scorePath = Path.Combine("/app/scores" + name);
-        if (System.IO.File.Exists(scorePath)) System.IO.File.Delete(scorePath);
-        return Ok();
+        var scorePath = Path.Combine($"/app/scores/{name}");
+        if (System.IO.File.Exists(scorePath)) {
+            System.IO.File.Delete(scorePath);
+            return Ok();
+        }
+        return NotFound(name);
     }
 }
