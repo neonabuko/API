@@ -53,10 +53,18 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         return StatusCode(201);
     }
 
-    [HttpDelete("/scores/{name}")]
+    [HttpDelete("/scores/{name}/data")]
     public async Task<IActionResult> DeleteScoreDataAsync(string name)
     {
         await scoreRepository.DeleteAsync(name);
+        return Ok();
+    }
+
+    [HttpDelete("/scores/{name}")]
+    public IActionResult DeleteScoreFileAsync(string name)
+    {
+        var scorePath = Path.Combine("/app/scores" + name);
+        if (System.IO.File.Exists(scorePath)) System.IO.File.Delete(scorePath);
         return Ok();
     }
 }
