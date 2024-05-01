@@ -16,7 +16,7 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
             Name = songDto.Name,
             Title = songDto.Title ?? songDto.Name,
             Duration = songDto.Duration,
-            Author = songDto.Author,
+            Author = songDto.Author ?? "Unknown",
             Bitrate = songDto.Bitrate
         };
         await songRepository.CreateAsync(newSong);
@@ -41,20 +41,16 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         return songs.Select(s => s.AsViewDto()).ToList();
     }
 
-    public async Task UpdateSongDataAsync(SongEditDto songEditDto, string name) {
-        await songRepository.UpdateAsync(songEditDto, name);
+    public async Task UpdateSongDataAsync(SongEditDto songEditDto, string name)
+    {
+        var title = songEditDto.Title ?? "";
+        var author = songEditDto.Author ?? "";
+        await songRepository.UpdateAsync(name, title, author);
     }
 
     public async Task DeleteAsync(string songName)
     {
-        try
-        {
-            await songRepository.DeleteAsync(songName);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        await songRepository.DeleteAsync(songName);
         string filePath = Path.Combine(_songsPath, songName);
         if (File.Exists(filePath)) File.Delete(filePath);
     }

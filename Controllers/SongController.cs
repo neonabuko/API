@@ -83,7 +83,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
             await songService.GetSongDataAsync(chunkDto.Name);
             return StatusCode(409, "Song already exists.");
         }
-        catch (NullReferenceException) { } // Means song doesn't exist yet in repository so we can save it
+        catch (NullReferenceException) { } // Song doesn't exist yet in repository so we can save it
 
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))

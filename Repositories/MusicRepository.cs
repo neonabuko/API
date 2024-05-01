@@ -13,6 +13,18 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
         await _context.SaveChangesAsync();
     }
 
+    public async Task<ICollection<T>> GetAllAsync() => await _dbSet.ToListAsync();
+    
+    public async Task<T> GetByNameAsync(string name) => await _dbSet.FirstOrDefaultAsync(m => m.Name == name)
+    ?? throw new NullReferenceException($"'{name}' not found in repository.");
+
+    public async Task UpdateAsync(string name, string title, string author)
+    {
+        var toUpdate = await GetByNameAsync(name);
+        toUpdate.Title = title ?? toUpdate.Title;
+        toUpdate.Author = author ?? toUpdate.Author;
+    }
+
     public async Task DeleteAsync(string name)
     {
         var music = await GetByNameAsync(name);
@@ -20,17 +32,5 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
             _dbSet.Remove(music);
             await _context.SaveChangesAsync();
         }
-    }
-
-    public async Task<ICollection<T>> GetAllAsync() => await _dbSet.ToListAsync();
-    
-    public async Task<T> GetByNameAsync(string name) => await _dbSet.FirstOrDefaultAsync(m => m.Name == name)
-    ?? throw new NullReferenceException($"'{name}' not found in repository.");
-
-    public async Task UpdateAsync(T music)
-    {
-        var toUpdate = await GetByNameAsync(music.Name);
-        toUpdate.Title = music.Title;
-        toUpdate.Author = music.Author;
-    }
+    }    
 }
