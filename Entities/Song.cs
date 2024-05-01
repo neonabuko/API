@@ -4,5 +4,4 @@ public class Song : Music
 {
     public int Id { get; set; }
     public TimeSpan Duration { get; set; }
-    public int Bitrate { get; set; }
 }

@@ -1,6 +1,6 @@
 namespace SongManager.Entities.Dto;
 
-public record ChunkDto(
+public record ChunkDto (
     int Id,
     string Name,
     IFormFile Data,

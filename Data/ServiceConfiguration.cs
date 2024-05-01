@@ -27,7 +27,7 @@ public static class ServiceConfiguration
         services.AddScoped<IMusicRepository<Song>, SongRepository>();
         services.AddScoped<IMusicRepository<Score>, ScoreRepository>();
         services.AddScoped<SongService>();
-        services.AddScoped<ChunkService>();
+        // services.AddScoped<ChunkService>();
 
         services.AddCors(options =>
         {

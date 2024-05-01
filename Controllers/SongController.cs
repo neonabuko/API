@@ -5,8 +5,10 @@ using SongManager.Entities.Dto;
 namespace SongManager.Controllers;
 
 [ApiController]
-public class SongController(SongService songService, ChunkService chunkService) : ControllerBase
+public class SongController(SongService songService) : ControllerBase
 {
+    private readonly ChunkService chunkService = new("/app/songs");
+
     [HttpGet("/")]
     public IActionResult Index() => Ok();
 
@@ -88,8 +90,8 @@ public class SongController(SongService songService, ChunkService chunkService) 
         await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
         if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
         {
-            var bitrate = await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
-            return Ok(new { Bitrate = bitrate });
+            await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
+            return Ok();
         }
         return StatusCode(202, "Stored chunk " + chunkDto.Id);
     }

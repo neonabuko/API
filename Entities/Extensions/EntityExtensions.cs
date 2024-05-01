@@ -10,8 +10,7 @@ public static class EntityExtensions
             song.Name,
             song.Title,
             song.Author,
-            song.Duration,
-            song.Bitrate
+            song.Duration
         );
     }
 
