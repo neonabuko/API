@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Repositories;
+using Service;
 using SongManager.Entities;
 using SongManager.Entities.Dto;
 using SongManager.Entities.Extensions;
@@ -9,6 +10,9 @@ namespace SongManager.Controllers;
 [ApiController]
 public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
 {
+
+    private readonly ChunkService chunkService = new("/app/scores");
+
     [HttpGet("/scores/data")]
     public async Task<IActionResult> GetAllScoreDataAsync()
     {
@@ -37,6 +41,25 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         return Ok();
     }
 
+    [HttpPost("/scores/chunks")]
+    public async Task<IActionResult> SaveScoreFileAsync([FromForm] ChunkDto chunkDto)
+    {
+        try
+        {
+            await scoreRepository.GetByNameAsync(chunkDto.Name);
+            return StatusCode(409, "Score already exists.");
+        }
+        catch (NullReferenceException) { }
+
+        await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
+        if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
+        {
+            await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
+            return Ok();
+        }
+        return StatusCode(202, "Stored chunk " + chunkDto.Id);
+    }
+
     [HttpGet("/scores/{name}")]
     public IActionResult GetScoreFileByNameAsync(string name)
     {
@@ -54,18 +77,13 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         return StatusCode(201);
     }
 
-    [HttpDelete("/scores/{name}/data")]
+    [HttpDelete("/scores/{name}")]
     public async Task<IActionResult> DeleteScoreDataAsync(string name)
     {
         await scoreRepository.DeleteAsync(name);
-        return Ok();
-    }
-
-    [HttpDelete("/scores/{name}")]
-    public IActionResult DeleteScoreFileAsync(string name)
-    {
         var scorePath = Path.Combine($"/app/scores/{name}");
-        if (System.IO.File.Exists(scorePath)) {
+        if (System.IO.File.Exists(scorePath))
+        {
             System.IO.File.Delete(scorePath);
             return Ok();
         }
