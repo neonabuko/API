@@ -13,5 +13,13 @@ public class SongManagerContext(DbContextOptions<SongManagerContext> options) : 
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new SongConfiguration());
+        
+        modelBuilder.Entity<Song>()
+        .HasIndex(s => s.Name)
+        .IsUnique();
+
+        modelBuilder.Entity<Score>()
+        .HasIndex(s => s.Name)
+        .IsUnique();
     }
 }

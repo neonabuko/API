@@ -30,7 +30,7 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         {
             Name = scoreDto.Name,
             Title = scoreDto.Title,
-            Author = scoreDto.Author
+            Author = scoreDto.Author ?? "Unknown"
         };
 
         await scoreRepository.CreateAsync(score);
