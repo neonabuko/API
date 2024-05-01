@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repositories;
 using Service;
+using SongManager.Entities;
 
 namespace SongManager.Data;
 
@@ -23,6 +24,7 @@ public static class ServiceConfiguration
         
         services.AddScoped<SongRepository>();
         services.AddScoped<ScoreRepository>();
+        services.AddScoped<IMusicRepository<Score>, ScoreRepository>();
         services.AddScoped<SongService>();
         services.AddScoped<ChunkService>();
 

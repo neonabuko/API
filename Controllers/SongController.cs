@@ -75,7 +75,7 @@ public class SongController(SongService songService, ChunkService chunkService) 
         return Ok();
     }
 
-    [HttpPost("/songs/uploadChunk")]
+    [HttpPost("/songs/chunks")]
     public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
     {
         try

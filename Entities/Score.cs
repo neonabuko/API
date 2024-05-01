@@ -1,14 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace SongManager.Entities;
 
-public class Score
+public class Score : Music
 {
     public int Id { get; set; }
-    [MaxLength(255)]
-    public required string Name { get; set; }
-    [MaxLength(255)]
-    public required string Title { get; set; }    
-    [MaxLength(255)]
-    public string? Author { get; set; }
 }
