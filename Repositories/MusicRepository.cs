@@ -23,6 +23,8 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
         var toUpdate = await GetByNameAsync(name);
         toUpdate.Title = title ?? toUpdate.Title;
         toUpdate.Author = author ?? toUpdate.Author;
+        _dbSet.Update(toUpdate);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string name)

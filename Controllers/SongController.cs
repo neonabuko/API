@@ -98,11 +98,11 @@ public class SongController(SongService songService) : ControllerBase
 
 
     [HttpPatch("/songs")]
-    public async Task<IActionResult> UpdateSongDataAsync([FromForm] SongEditDto songEditDto, [FromQuery] string name)
+    public async Task<IActionResult> UpdateSongDataAsync([FromForm] SongEditDto songEditDto)
     {
         try
         {
-            await songService.UpdateSongDataAsync(songEditDto, name);
+            await songService.UpdateSongDataAsync(songEditDto);
         }
         catch (NullReferenceException e)
         {

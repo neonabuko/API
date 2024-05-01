@@ -40,8 +40,9 @@ public class SongService(IConfiguration configuration, SongRepository songReposi
         return songs.Select(s => s.AsViewDto()).ToList();
     }
 
-    public async Task UpdateSongDataAsync(SongEditDto songEditDto, string name)
+    public async Task UpdateSongDataAsync(SongEditDto songEditDto)
     {
+        var name = songEditDto.Name;
         var title = songEditDto.Title ?? "";
         var author = songEditDto.Author ?? "";
         await songRepository.UpdateAsync(name, title, author);
