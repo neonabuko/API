@@ -24,7 +24,6 @@ public class ChunkService(string outputDir)
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
         var outputFilePath = Path.Combine(outputDir + $"/{fileIdentifier}");
-        Console.WriteLine(outputFilePath);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         foreach (var chunkFilePath in chunkFileNames)
         {

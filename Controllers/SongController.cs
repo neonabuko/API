@@ -70,7 +70,7 @@ public class SongController(SongService songService) : ControllerBase
         };
     }
 
-    [HttpPost("/songs")]
+    [HttpPost("/songs/data")]
     public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
     {
         await songService.SaveToRepositoryAsync(songDto);
