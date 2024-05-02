@@ -98,17 +98,13 @@ public class SongController(SongService songService) : ControllerBase
 
 
     [HttpPatch("/songs/data")]
-    public async Task<IActionResult> UpdateSongDataAsync([FromForm] SongEditDto songEditDto)
+    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto songEditDto)
     {
         try
         {
             await songService.UpdateSongDataAsync(songEditDto);
         }
-        catch (NullReferenceException e)
-        {
-            return StatusCode(404, e);
-        }
-        catch (InvalidOperationException e)
+        catch (Exception e)
         {
             return StatusCode(500, e);
         }

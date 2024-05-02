@@ -68,6 +68,20 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         return new FileStreamResult(fileStream, "application/vnd.recordare.musicxml+xml");
     }
 
+    [HttpPatch("/scores/data")]
+    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto songEditDto)
+    {
+        try
+        {
+            await scoreRepository.UpdateAsync(songEditDto.Name, songEditDto.Title ?? "", songEditDto.Author ?? "");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e);
+        }
+        return Ok();
+    }
+
     [HttpPost("/scores")]
     public async Task<IActionResult> SaveScoreFileAsync([FromForm] IFormFile scoreFile)
     {
