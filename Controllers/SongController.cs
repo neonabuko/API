@@ -97,7 +97,7 @@ public class SongController(SongService songService) : ControllerBase
     }
 
 
-    [HttpPatch("/songs")]
+    [HttpPatch("/songs/data")]
     public async Task<IActionResult> UpdateSongDataAsync([FromForm] SongEditDto songEditDto)
     {
         try
