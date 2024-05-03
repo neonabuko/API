@@ -1,8 +1,7 @@
 namespace SongManager.Entities.Dto;
 
-public record ScoreDto(
+public record ScoreViewDto (
     string Name,
     string Title,
-    string? Author,
-    string Content
+    string Author
 );

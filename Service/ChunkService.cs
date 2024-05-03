@@ -1,7 +1,19 @@
+using System.Text;
+using SongManager.Entities.Dto;
+
 namespace Service;
 
 public class ChunkService(string outputDir)
 {
+
+    public async Task StoreScoreContentAsync(string name, string mei)
+    {
+        var outputFilePath = Path.Combine(outputDir, $"{name}");
+        await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
+        var byteData = Encoding.UTF8.GetBytes(mei);
+        await outputFileStream.WriteAsync(byteData);
+    }
+
 
     public async Task StoreChunkAsync(string fileIdentifier, int chunkNumber, int totalChunks, IFormFile chunkData)
     {

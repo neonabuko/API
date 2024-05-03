@@ -10,7 +10,6 @@ namespace SongManager.Controllers;
 [ApiController]
 public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
 {
-
     private readonly ChunkService chunkService = new("/app/scores");
 
     [HttpGet("/scores/data")]
@@ -60,6 +59,28 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
         return StatusCode(202, "Stored chunk " + chunkDto.Id);
     }
 
+    [HttpPost("/scores/json")]
+    public async Task<IActionResult> SaveScoreAsync(ScoreDto scoreDto)
+    {
+        try
+        {
+            await scoreRepository.GetByNameAsync(scoreDto.Name);
+            return StatusCode(409, "Score already exists.");
+        }
+        catch (NullReferenceException) { }
+        await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
+
+        Score score = new()
+        {
+            Name = scoreDto.Name,
+            Title = scoreDto.Title,
+            Author = scoreDto.Author ?? "Unknown"
+        };
+
+        await scoreRepository.CreateAsync(score);
+        return Ok();
+    }
+
     [HttpGet("/scores/{name}")]
     public IActionResult GetScoreFileByNameAsync(string name)
     {
@@ -80,15 +101,6 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
             return StatusCode(500, e);
         }
         return Ok();
-    }
-
-    [HttpPost("/scores")]
-    public async Task<IActionResult> SaveScoreFileAsync([FromForm] IFormFile scoreFile)
-    {
-        var scorePath = Path.Combine("/app/scores" + $"/{scoreFile.FileName}");
-        await using var fileStream = new FileStream(scorePath, FileMode.Create, FileAccess.Write);
-        await scoreFile.CopyToAsync(fileStream);
-        return StatusCode(201);
     }
 
     [HttpDelete("/scores/{name}")]
