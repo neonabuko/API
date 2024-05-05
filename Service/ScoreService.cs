@@ -10,78 +10,71 @@ public class ScoreService(IConfiguration configuration, ScoreRepository scoreRep
     private readonly string _scoresPath = configuration.GetValue<string>("ScoresPath") ?? throw new NullReferenceException();
     private readonly ChunkService chunkService = new("/app/scores");
     
-    public async Task<ICollection<ScoreViewDto>> GetAllScoreDataAsync()
+    public async Task<ICollection<ScoreViewDto>> GetAllDataAsync()
     {
         var scores = await scoreRepository.GetAllAsync();
         return scores.Select(scores => scores.AsViewDto()).ToList();
     }
 
-    public async Task<ScoreViewDto> GetScoreDataByNameAsync(string name)
+    public async Task<ScoreViewDto> GetDataByNameAsync(string name)
     {
         var score = await scoreRepository.GetByNameAsync(name);
         return score.AsViewDto();
     }
 
-    public FileStream GetScoreFileByNameAsync(string name)
+    public FileStream GetFileByNameAsync(string name)
     {
-        string scorePath = Path.Combine(_scoresPath, name);
-        var fileStream = new FileStream(scorePath, FileMode.Open, FileAccess.Read);
+        string path = Path.Combine(_scoresPath, name);
+        var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
         return fileStream;
     }
 
-    public async Task SaveScoreDataAsync(ScoreDto scoreDto)
+    public async Task SaveDataAsync(ScoreDto dto)
     {
         Score score = new()
         {
-            Name = scoreDto.Name,
-            Title = scoreDto.Title,
-            Author = scoreDto.Author ?? "Unknown"
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown"
         };
 
         await scoreRepository.CreateAsync(score);
     }
 
-    public async Task SaveScoreFileAsync(ChunkDto chunkDto)
+    public async Task SaveFileAsync(ChunkDto dto)
     {
-        try
+        await chunkService.StoreChunkAsync(dto.Name, dto.Id, dto.TotalChunks, dto.Data);
+        if (await chunkService.IsFileCompleteAsync(dto.Name, dto.TotalChunks))
         {
-            await scoreRepository.GetByNameAsync(chunkDto.Name);
-            throw new InvalidOperationException("Score already exists.");
-        }
-        catch (NullReferenceException) { }
-
-        await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
-        if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
-        {
-            await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
+            await chunkService.ReconstructFileAsync(dto.Name, dto.TotalChunks);
         }
     }
 
-    public async Task SaveScoreAsync(ScoreDto scoreDto)
+    public async Task SaveScoreAsync(ScoreDto dto)
     {
         Score score = new()
         {
-            Name = scoreDto.Name,
-            Title = scoreDto.Title,
-            Author = scoreDto.Author ?? "Unknown"
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown"
         };
         await scoreRepository.CreateAsync(score);
 
-        await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
+        await chunkService.StoreScoreContentAsync(dto.Name, dto.Content);
     }
 
-    public async Task UpdateDataAsync(SongEditDto songEditDto)
+    public async Task UpdateDataAsync(SongEditDto dto)
     {
-        await scoreRepository.UpdateAsync(songEditDto.Name, songEditDto.Title ?? "", songEditDto.Author ?? "");
+        await scoreRepository.UpdateAsync(dto.Name, dto.Title ?? "", dto.Author ?? "");
     }
 
-    public async Task DeleteScoreDataAsync(string name)
+    public async Task DeleteDataAsync(string name)
     {
         await scoreRepository.DeleteAsync(name);
-        var scorePath = Path.Combine($"/app/scores/{name}");
-        if (File.Exists(scorePath))
+        var path = Path.Combine($"/app/scores/{name}");
+        if (File.Exists(path))
         {
-            File.Delete(scorePath);
+            File.Delete(path);
         }
     }
 
