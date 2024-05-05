@@ -14,7 +14,7 @@ public static class EntityExtensions
         );
     }
 
-    public static ScoreViewDto AsDto(this Score score)
+    public static ScoreViewDto AsViewDto(this Score score)
     {
         return new ScoreViewDto(
             score.Name,
