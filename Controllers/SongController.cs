@@ -5,18 +5,15 @@ using ScoreHubAPI.Entities.Dto;
 namespace ScoreHubAPI.Controllers;
 
 [ApiController]
+[Route("/songs")]
 public class SongController(SongService songService) : ControllerBase
 {
     private readonly ChunkService chunkService = new("/app/songs");
 
-    [HttpGet("/")]
-    public IActionResult Index() => Ok();
-
-
-    [HttpGet("/songs")]
+    [HttpGet]
     public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongDataAsync();
 
-    [HttpGet("/songs/{songName}/data")]
+    [HttpGet("{songName}/data")]
     public async Task<IActionResult> GetSongAsync(string songName)
     {
         var song = await songService.GetSongDataAsync(songName);
@@ -24,7 +21,7 @@ public class SongController(SongService songService) : ControllerBase
     }
 
 
-    [HttpGet("/songs/{songName}")]
+    [HttpGet("{songName}")]
     public IActionResult StreamSongAsync(string songName)
     {
         var fileStream = songService.GetSongFileStream(songName);
@@ -70,14 +67,14 @@ public class SongController(SongService songService) : ControllerBase
         };
     }
 
-    [HttpPost("/songs/data")]
+    [HttpPost("data")]
     public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
     {
         await songService.SaveToRepositoryAsync(songDto);
         return Ok();
     }
 
-    [HttpPost("/songs/chunks")]
+    [HttpPost("chunks")]
     public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
     {
         try
@@ -97,7 +94,7 @@ public class SongController(SongService songService) : ControllerBase
     }
 
 
-    [HttpPatch("/songs/data")]
+    [HttpPatch("data")]
     public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto songEditDto)
     {
         try
@@ -111,7 +108,7 @@ public class SongController(SongService songService) : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("/songs/{songName}")]
+    [HttpDelete("{songName}")]
     public async Task<IActionResult> DeleteSongAsync(string songName)
     {
         await songService.DeleteAsync(songName);

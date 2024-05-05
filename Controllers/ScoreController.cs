@@ -5,38 +5,39 @@ using ScoreHubAPI.Entities.Dto;
 namespace ScoreHubAPI.Controllers;
 
 [ApiController]
+[Route("/scores")]
 public class ScoreController(ScoreService scoreService) : ControllerBase
 {
 
-    [HttpGet("/scores/data")]
+    [HttpGet("data")]
     public async Task<IActionResult> GetAllScoreDataAsync()
     {
         var scores = await scoreService.GetAllScoreDataAsync();
         return Ok(scores);
     }
 
-    [HttpGet("/scores/{name}/data")]
+    [HttpGet("{name}/data")]
     public async Task<IActionResult> GetScoreDataByNameAsync(string name)
     {
         var score = await scoreService.GetScoreDataByNameAsync(name);
         return Ok(score);
     }
 
-    [HttpGet("/scores/{name}")]
+    [HttpGet("{name}")]
     public IActionResult GetScoreFileByNameAsync(string name)
     {
         var score = scoreService.GetScoreFileByNameAsync(name);
         return new FileStreamResult(score, "application/vnd.recordare.musicxml+xml");
     }
 
-    [HttpPost("/scores/data")]
+    [HttpPost("data")]
     public async Task<IActionResult> SaveScoreDataAsync([FromForm] ScoreDto scoreDto)
     {
         await scoreService.SaveScoreDataAsync(scoreDto);
         return Ok();
     }
 
-    [HttpPost("/scores/chunks")]
+    [HttpPost("chunks")]
     public async Task<IActionResult> SaveScoreFileAsync([FromForm] ChunkDto chunkDto)
     {
         try
@@ -50,7 +51,7 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
         return StatusCode(202, "Stored chunk " + chunkDto.Id);
     }
 
-    [HttpPost("/scores/json")]
+    [HttpPost("json")]
     public async Task<IActionResult> SaveScoreAsync(ScoreDto scoreDto)
     {
         try
@@ -64,14 +65,14 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
         return Ok();
     }
 
-    [HttpPatch("/scores/data")]
+    [HttpPatch("data")]
     public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto songEditDto)
     {
         await scoreService.UpdateDataAsync(songEditDto);
         return Ok();
     }
 
-    [HttpDelete("/scores/{name}")]
+    [HttpDelete("{name}")]
     public async Task<IActionResult> DeleteScoreDataAsync(string name)
     {
         await scoreService.DeleteScoreDataAsync(name);
