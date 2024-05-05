@@ -1,13 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ./SongManager.csproj .
+COPY ./ScoreHub-API.csproj .
 
-RUN dotnet restore "./SongManager.csproj" --disable-parallel
+RUN dotnet restore "./ScoreHub-API.csproj" --disable-parallel
 
 COPY . .
 
-RUN dotnet publish "./SongManager.csproj" -c release -o /app --no-restore
+RUN dotnet publish "./ScoreHub-API.csproj" -c release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
@@ -17,4 +17,4 @@ USER root
 EXPOSE 5000
 EXPOSE 7196
 
-ENTRYPOINT ["dotnet", "SongManager.dll"]
+ENTRYPOINT ["dotnet", "ScoreHub-API.dll"]
