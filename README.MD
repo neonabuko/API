@@ -1,11 +1,6 @@
 # ScoreHub API
 
-### With this API, you can:
-- Save music files
-- Store music metadata
-- Retrieve music metadata
-- Stream music
-- Delete music
+### With this API, you can create, read, update and delete songs and music scores.
 
 ### Running
 This API is meant to run along with ScoreHub-App. See https://github.com/neonabuko/SongManager for further instructions.
