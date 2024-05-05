@@ -27,6 +27,7 @@ public static class ServiceConfiguration
         services.AddScoped<IMusicRepository<Song>, SongRepository>();
         services.AddScoped<IMusicRepository<Score>, ScoreRepository>();
         services.AddScoped<SongService>();
+        services.AddScoped<ScoreService>();
         // services.AddScoped<ChunkService>(); not scoped anymore because it's being manually instantiated
 
         services.AddCors(options =>
