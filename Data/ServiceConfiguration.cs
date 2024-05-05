@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Repositories;
-using Service;
-using SongManager.Entities;
+using ScoreHubAPI.Repositories;
+using ScoreHubAPI.Service;
+using ScoreHubAPI.Entities;
 
-namespace SongManager.Data;
+namespace ScoreHubAPI.Data;
 
 public static class ServiceConfiguration
 {
@@ -11,23 +11,23 @@ public static class ServiceConfiguration
     public static async Task InitializeDbAsync(this IServiceProvider serviceProvider)
     {
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<SongManagerContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ScoreHubContext>();
         await dbContext.Database.MigrateAsync();
     } 
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services,
     IConfiguration configuration) 
     {
-        var connectionString = configuration.GetConnectionString("SongManagerContext");
+        var connectionString = configuration.GetConnectionString("ScoreHubContext");
         services.AddSingleton(configuration);
-        services.AddSqlServer<SongManagerContext>(connectionString);
+        services.AddSqlServer<ScoreHubContext>(connectionString);
         
         services.AddScoped<SongRepository>();
         services.AddScoped<ScoreRepository>();
         services.AddScoped<IMusicRepository<Song>, SongRepository>();
         services.AddScoped<IMusicRepository<Score>, ScoreRepository>();
         services.AddScoped<SongService>();
-        // services.AddScoped<ChunkService>();
+        // services.AddScoped<ChunkService>(); not scoped anymore because it's being manually instantiated
 
         services.AddCors(options =>
         {

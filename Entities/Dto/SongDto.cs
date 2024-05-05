@@ -1,4 +1,4 @@
-﻿namespace SongManager.Entities.Dto;
+﻿namespace ScoreHubAPI.Entities.Dto;
 
 public record SongDto(
     string Name,

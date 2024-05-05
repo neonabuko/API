@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace SongManager.Data.Migrations
+namespace ScoreHubAPI.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Migration_1 : Migration

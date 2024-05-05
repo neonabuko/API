@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Repositories;
-using Service;
-using SongManager.Entities;
-using SongManager.Entities.Dto;
-using SongManager.Entities.Extensions;
+using ScoreHubAPI.Repositories;
+using ScoreHubAPI.Service;
+using ScoreHubAPI.Entities;
+using ScoreHubAPI.Entities.Dto;
+using ScoreHubAPI.Entities.Extensions;
 
-namespace SongManager.Controllers;
+namespace ScoreHubAPI.Controllers;
 
 [ApiController]
 public class ScoreController(ScoreRepository scoreRepository) : ControllerBase

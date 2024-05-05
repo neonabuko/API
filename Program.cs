@@ -1,4 +1,4 @@
-using SongManager.Data;
+using ScoreHubAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

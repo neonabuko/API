@@ -1,6 +1,6 @@
-using SongManager.Entities;
+using ScoreHubAPI.Entities;
 
-namespace Repositories;
+namespace ScoreHubAPI.Repositories;
 
 public interface IMusicRepository<T> where T : Music
 {

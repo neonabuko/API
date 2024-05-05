@@ -1,6 +1,6 @@
-﻿using SongManager.Entities.Dto;
+﻿using ScoreHubAPI.Entities.Dto;
 
-namespace SongManager.Entities.Extensions;
+namespace ScoreHubAPI.Entities.Extensions;
 
 public static class EntityExtensions
 {

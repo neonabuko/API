@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using SongManager.Entities;
+using ScoreHubAPI.Entities;
 
-namespace Repositories;
+namespace ScoreHubAPI.Repositories;
 
 public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where T : Music
 {

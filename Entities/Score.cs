@@ -1,4 +1,4 @@
-namespace SongManager.Entities;
+namespace ScoreHubAPI.Entities;
 
 public class Score : Music
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SongManager.Entities;
+namespace ScoreHubAPI.Entities;
 
 public abstract class Music {
     [MaxLength(255)]

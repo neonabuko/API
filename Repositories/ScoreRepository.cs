@@ -1,8 +1,8 @@
-using SongManager.Data;
-using SongManager.Entities;
+using ScoreHubAPI.Data;
+using ScoreHubAPI.Entities;
 
-namespace Repositories;
+namespace ScoreHubAPI.Repositories;
 
-public class ScoreRepository(SongManagerContext _context) : MusicRepository<Score>(_context)
+public class ScoreRepository(ScoreHubContext _context) : MusicRepository<Score>(_context)
 {
 }

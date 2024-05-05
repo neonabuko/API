@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Service;
-using SongManager.Entities.Dto;
+using ScoreHubAPI.Service;
+using ScoreHubAPI.Entities.Dto;
 
-namespace SongManager.Controllers;
+namespace ScoreHubAPI.Controllers;
 
 [ApiController]
 public class SongController(SongService songService) : ControllerBase

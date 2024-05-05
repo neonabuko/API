@@ -1,16 +1,15 @@
 using System.Text;
-using SongManager.Entities.Dto;
 
-namespace Service;
+namespace ScoreHubAPI.Service;
 
 public class ChunkService(string outputDir)
 {
-    private readonly string[] allowedExtensions = [".mei", ".musicxml"];
+    private readonly string[] allowedScoreExtensions = [".mei", ".musicxml"];
 
     public async Task StoreScoreContentAsync(string name, string content)
     {
         var extension = Path.GetExtension(name).ToLowerInvariant();
-        if (!Array.Exists(allowedExtensions, ext => ext == extension))
+        if (!Array.Exists(allowedScoreExtensions, ext => ext == extension))
         {
             throw new ArgumentException($"Invalid file extension '{extension}'.");
         }

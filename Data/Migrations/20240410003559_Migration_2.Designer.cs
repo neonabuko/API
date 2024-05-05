@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SongManager;
+using ScoreHubAPI;
 
 #nullable disable
 
-namespace SongManager.Data.Migrations
+namespace ScoreHubAPI.Data.Migrations
 {
-    [DbContext(typeof(SongManagerContext))]
+    [DbContext(typeof(ScoreHubContext))]
     [Migration("20240410003559_Migration_2")]
     partial class Migration_2
     {

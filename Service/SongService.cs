@@ -1,9 +1,9 @@
-using Repositories;
-using SongManager.Entities;
-using SongManager.Entities.Dto;
-using SongManager.Entities.Extensions;
+using ScoreHubAPI.Repositories;
+using ScoreHubAPI.Entities;
+using ScoreHubAPI.Entities.Dto;
+using ScoreHubAPI.Entities.Extensions;
 
-namespace Service;
+namespace ScoreHubAPI.Service;
 
 public class SongService(IConfiguration configuration, SongRepository songRepository)
 {
