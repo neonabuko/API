@@ -26,9 +26,17 @@ public static class ServiceConfiguration
         services.AddScoped<ScoreRepository>();
         services.AddScoped<IMusicRepository<Song>, SongRepository>();
         services.AddScoped<IMusicRepository<Score>, ScoreRepository>();
-        services.AddScoped<SongService>();
-        services.AddScoped<ScoreService>();
-        // services.AddScoped<ChunkService>(); not scoped anymore because it's being manually instantiated
+
+        var scoresPath = configuration.GetValue<string>("StoragePaths:scores");
+        var songsPath = configuration.GetValue<string>("StoragePaths:songs");
+
+        services.AddScoped<ScoreService>(sp => new ScoreService(
+            sp.GetRequiredService<IMusicRepository<Score>>(), scoresPath ?? throw new NullReferenceException()
+        ));
+        
+        services.AddScoped<SongService>(sp => new SongService(
+            sp.GetRequiredService<IMusicRepository<Song>>(), songsPath ?? throw new NullReferenceException()
+        ));
 
         services.AddCors(options =>
         {

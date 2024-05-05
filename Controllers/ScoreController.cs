@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
 using Microsoft.EntityFrameworkCore;
+using ScoreHubAPI.Entities;
 
 namespace ScoreHubAPI.Controllers;
 
@@ -36,7 +37,13 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     {
         try
         {
-            await scoreService.SaveDataAsync(dto);
+            Score score = new()
+            {
+                Name = dto.Name,
+                Title = dto.Title,
+                Author = dto.Author ?? "Unknown"
+            };
+            await scoreService.SaveDataAsync(score);
         }
         catch (DbUpdateException e)
         {
@@ -57,7 +64,13 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     {
         try
         {
-            await scoreService.SaveScoreAsync(dto);
+            Score score = new()
+            {
+                Name = dto.Name,
+                Title = dto.Title,
+                Author = dto.Author ?? "Unknown"
+            };
+            await scoreService.SaveScoreJsonAsync(score, dto.Content);
         }
         catch (DbUpdateException e)
         {
@@ -69,14 +82,20 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     [HttpPatch("data")]
     public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto dto)
     {
-        await scoreService.UpdateDataAsync(dto);
+        Score score = new()
+        {
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author
+        };
+        await scoreService.UpdateDataAsync(score);
         return Ok();
     }
 
     [HttpDelete("{name}")]
-    public async Task<IActionResult> DeleteDataAsync(string name)
+    public async Task<IActionResult> DeleteAsync(string name)
     {
-        await scoreService.DeleteDataAsync(name);
+        await scoreService.DeleteAsync(name);
         return Ok();
     }
 }

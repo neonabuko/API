@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
+using ScoreHubAPI.Entities.Extensions;
+using ScoreHubAPI.Entities;
 
 namespace ScoreHubAPI.Controllers;
 
@@ -8,15 +10,19 @@ namespace ScoreHubAPI.Controllers;
 [Route("/songs")]
 public class SongController(SongService songService) : ControllerBase
 {
-    private readonly ChunkService chunkService = new("/app/songs");
 
     [HttpGet]
-    public async Task<ICollection<SongDto>> GetAllSongDataAsync() => await songService.GetAllSongDataAsync();
+    public async Task<IActionResult> GetAllSongDataAsync()
+    {
+        var songs = await songService.GetAllDataAsync();
+        var songsDto = songs.Select(s => s.AsDto()).ToList();
+        return Ok(songsDto);
+    }
 
     [HttpGet("{songName}/data")]
     public async Task<IActionResult> GetSongAsync(string songName)
     {
-        var song = await songService.GetSongDataAsync(songName);
+        var song = await songService.GetDataByNameAsync(songName);
         return Ok(song);
     }
 
@@ -24,7 +30,7 @@ public class SongController(SongService songService) : ControllerBase
     [HttpGet("{songName}")]
     public IActionResult StreamSongAsync(string songName)
     {
-        var fileStream = songService.GetSongFileStream(songName);
+        var fileStream = songService.GetFileByNameAsync(songName);
         if (fileStream == null)
         {
             return NotFound();
@@ -70,29 +76,37 @@ public class SongController(SongService songService) : ControllerBase
     [HttpPost("data")]
     public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
     {
-        await songService.SaveToRepositoryAsync(songDto);
+        Song song = new()
+        {
+            Name = songDto.Name,
+            Title = songDto.Title,
+            Author = songDto.Author ?? "Unknown",
+            Duration = songDto.Duration
+        };
+        await songService.SaveDataAsync(song);
         return Ok();
     }
 
     [HttpPost("chunks")]
     public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
     {
-        await chunkService.StoreChunkAsync(chunkDto.Name, chunkDto.Id, chunkDto.TotalChunks, chunkDto.Data);
-        if (await chunkService.IsFileCompleteAsync(chunkDto.Name, chunkDto.TotalChunks))
-        {
-            await chunkService.ReconstructFileAsync(chunkDto.Name, chunkDto.TotalChunks);
-            return Ok();
-        }
-        return StatusCode(202, "Stored chunk " + chunkDto.Id);
+        await songService.SaveFileAsync(chunkDto);
+        return Ok();
     }
 
 
     [HttpPatch("data")]
-    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto songEditDto)
+    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto dto)
     {
         try
         {
-            await songService.UpdateSongDataAsync(songEditDto);
+            Song song = new()
+            {
+                Name = dto.Name,
+                Title = dto.Title,
+                Author = dto.Author
+            };
+            await songService.UpdateDataAsync(song);
         }
         catch (Exception e)
         {

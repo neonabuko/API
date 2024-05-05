@@ -18,12 +18,9 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
     public async Task<T> GetByNameAsync(string name) => await _dbSet.FirstOrDefaultAsync(m => m.Name == name)
     ?? throw new NullReferenceException($"'{name}' not found in repository.");
 
-    public async Task UpdateAsync(string name, string title, string author)
+    public async Task UpdateAsync(T music)
     {
-        var toUpdate = await GetByNameAsync(name);
-        toUpdate.Title = title ?? toUpdate.Title;
-        toUpdate.Author = author ?? toUpdate.Author;
-        _dbSet.Update(toUpdate);
+        _dbSet.Update(music);
         await _context.SaveChangesAsync();
     }
 

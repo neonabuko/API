@@ -4,7 +4,7 @@ namespace ScoreHubAPI.Entities.Extensions;
 
 public static class EntityExtensions
 {
-    public static SongDto AsViewDto(this Song song) 
+    public static SongDto AsDto(this Song song) 
     {
         return new SongDto(
             song.Name,
