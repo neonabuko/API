@@ -5,12 +5,18 @@ namespace Service;
 
 public class ChunkService(string outputDir)
 {
+    private readonly string[] allowedExtensions = [".mei", ".musicxml"];
 
-    public async Task StoreScoreContentAsync(string name, string mei)
+    public async Task StoreScoreContentAsync(string name, string content)
     {
+        var extension = Path.GetExtension(name).ToLowerInvariant();
+        if (!Array.Exists(allowedExtensions, ext => ext == extension))
+        {
+            throw new ArgumentException($"Invalid file extension '{extension}'.");
+        }
         var outputFilePath = Path.Combine(outputDir, $"{name}");
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
-        var byteData = Encoding.UTF8.GetBytes(mei);
+        var byteData = Encoding.UTF8.GetBytes(content);
         await outputFileStream.WriteAsync(byteData);
     }
 

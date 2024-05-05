@@ -68,7 +68,15 @@ public class ScoreController(ScoreRepository scoreRepository) : ControllerBase
             return StatusCode(409, "Score already exists.");
         }
         catch (NullReferenceException) { }
-        await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
+
+        try
+        {
+            await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
+        }
+        catch (ArgumentException message)
+        {
+            return BadRequest(message);
+        }
 
         Score score = new()
         {
