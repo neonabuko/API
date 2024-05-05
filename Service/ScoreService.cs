@@ -59,23 +59,15 @@ public class ScoreService(IConfiguration configuration, ScoreRepository scoreRep
 
     public async Task SaveScoreAsync(ScoreDto scoreDto)
     {
-        try
-        {
-            await scoreRepository.GetByNameAsync(scoreDto.Name);
-            throw new InvalidOperationException("Score already exists.");
-        }
-        catch (NullReferenceException) { }
-
-        await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
-
         Score score = new()
         {
             Name = scoreDto.Name,
             Title = scoreDto.Title,
             Author = scoreDto.Author ?? "Unknown"
         };
-
         await scoreRepository.CreateAsync(score);
+
+        await chunkService.StoreScoreContentAsync(scoreDto.Name, scoreDto.Content);
     }
 
     public async Task UpdateDataAsync(SongEditDto songEditDto)

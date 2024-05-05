@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScoreHubAPI.Controllers;
 
@@ -58,7 +59,7 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
         {
             await scoreService.SaveScoreAsync(scoreDto);
         }
-        catch (InvalidOperationException e)
+        catch (DbUpdateException e)
         {
             return StatusCode(409, e.Message);
         }
