@@ -1,6 +1,6 @@
 namespace ScoreHubAPI.Entities.Dto;
 
-public record SongEditDto (
+public record MusicEditDto (
     string Name,
     string? Title,
     string? Author

@@ -12,113 +12,56 @@ public class SongController(SongService songService) : ControllerBase
 {
 
     [HttpGet]
-    public async Task<IActionResult> GetAllSongDataAsync()
+    public async Task<IActionResult> GetAllDataAsync()
     {
         var songs = await songService.GetAllDataAsync();
-        var songsDto = songs.Select(s => s.AsDto()).ToList();
-        return Ok(songsDto);
+        var songsAsDto = songs.Select(s => s.AsDto()).ToList();
+        return Ok(songsAsDto);
     }
 
-    [HttpGet("{songName}/data")]
-    public async Task<IActionResult> GetSongAsync(string songName)
+    [HttpGet("{name}/data")]
+    public async Task<IActionResult> GetDataByNameAsync(string name)
     {
-        var song = await songService.GetDataByNameAsync(songName);
-        return Ok(song);
+        var song = await songService.GetDataByNameAsync(name);
+        return Ok(song.AsDto());
     }
 
-
-    [HttpGet("{songName}")]
-    public IActionResult StreamSongAsync(string songName)
-    {
-        var fileStream = songService.GetFileByNameAsync(songName);
-        if (fileStream == null)
-        {
-            return NotFound();
-        }
-
-        long fileSize = fileStream.Length;
-
-        if (Request.Headers.TryGetValue("Range", out var rangeValues))
-        {
-            var rangeHeader = rangeValues.FirstOrDefault();
-
-            if (rangeHeader != null && rangeHeader.StartsWith("bytes="))
-            {
-                var rangeParts = rangeHeader[6..].Split('-');
-                long startByte = long.Parse(rangeParts[0]);
-                long endByte = (rangeParts.Length > 1 && !string.IsNullOrWhiteSpace(rangeParts[1]))
-                                ? long.Parse(rangeParts[1])
-                                : fileSize - 1;
-
-                var responseLength = endByte - startByte + 1;
-
-                fileStream.Seek(startByte, SeekOrigin.Begin);
-
-                var responseStream = new FileStreamResult(fileStream, "audio/mpeg")
-                {
-                    EnableRangeProcessing = true
-                };
-
-                Response.StatusCode = 206;
-                Response.Headers.ContentRange = $"bytes {startByte}-{endByte}/{fileSize}";
-                Response.Headers["Content-Length"] = responseLength.ToString();
-
-                return responseStream;
-            }
-        }
-
-        return new FileStreamResult(fileStream, "audio/mpeg")
-        {
-            EnableRangeProcessing = true
-        };
-    }
+    [HttpGet("{name}")]
+    public IActionResult Stream(string name) => songService.Stream(Request, Response, name);    
 
     [HttpPost("data")]
-    public async Task<IActionResult> SaveSongDataAsync([FromForm] SongDto songDto)
+    public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)
     {
         Song song = new()
         {
-            Name = songDto.Name,
-            Title = songDto.Title,
-            Author = songDto.Author ?? "Unknown",
-            Duration = songDto.Duration
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown",
+            Duration = dto.Duration
         };
         await songService.SaveDataAsync(song);
         return Ok();
     }
 
     [HttpPost("chunks")]
-    public async Task<IActionResult> SaveSongFileAsync([FromForm] ChunkDto chunkDto)
+    public async Task<IActionResult> SaveFileAsync([FromForm] ChunkDto dto)
     {
-        await songService.SaveFileAsync(chunkDto);
+        await songService.SaveFileAsync(dto);
         return Ok();
     }
 
 
     [HttpPatch("data")]
-    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto dto)
+    public async Task<IActionResult> UpdateDataAsync([FromForm] MusicEditDto dto)
     {
-        try
-        {
-            Song song = new()
-            {
-                Name = dto.Name,
-                Title = dto.Title,
-                Author = dto.Author
-            };
-            await songService.UpdateDataAsync(song);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e);
-        }
+        await songService.UpdateDataAsync(dto);
         return Ok();
     }
 
-    [HttpDelete("{songName}")]
-    public async Task<IActionResult> DeleteSongAsync(string songName)
+    [HttpDelete("{name}")]
+    public async Task<IActionResult> DeleteAsync(string name)
     {
-        await songService.DeleteAsync(songName);
+        await songService.DeleteAsync(name);
         return Ok();
     }
 }

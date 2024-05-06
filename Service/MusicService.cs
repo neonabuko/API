@@ -56,11 +56,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         }
     }
 
-    public async Task UpdateDataAsync(T music)
+    public async Task UpdateDataAsync(MusicEditDto dto)
     {
-        var toUpdate = await musicRepository.GetByNameAsync(music.Name);
-        toUpdate.Title = music.Title ?? toUpdate.Title;
-        toUpdate.Author = music.Author ?? toUpdate.Author;
+        var toUpdate = await musicRepository.GetByNameAsync(dto.Name);
+        toUpdate.Title = dto.Title ?? toUpdate.Title;
+        toUpdate.Author = dto.Author ?? toUpdate.Author;
         await musicRepository.UpdateAsync(toUpdate);
     }
 

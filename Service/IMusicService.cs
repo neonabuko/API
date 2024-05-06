@@ -10,7 +10,7 @@ public interface IMusicService<T> where T : Music
     FileStream GetFileByNameAsync(string name);
     Task SaveDataAsync(T music);
     Task SaveFileAsync(ChunkDto dto);
-    Task UpdateDataAsync(T music);
+    Task UpdateDataAsync(MusicEditDto music);
     Task DeleteAsync(string name);
 
     // Chunk operations

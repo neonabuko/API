@@ -70,7 +70,7 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
                 Title = dto.Title,
                 Author = dto.Author ?? "Unknown"
             };
-            await scoreService.SaveScoreJsonAsync(score, dto.Content);
+            await scoreService.SaveJsonAsync(score, dto.Content);
         }
         catch (DbUpdateException e)
         {
@@ -80,15 +80,9 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     }
 
     [HttpPatch("data")]
-    public async Task<IActionResult> UpdateDataAsync([FromForm] SongEditDto dto)
+    public async Task<IActionResult> UpdateDataAsync([FromForm] MusicEditDto dto)
     {
-        Score score = new()
-        {
-            Name = dto.Name,
-            Title = dto.Title,
-            Author = dto.Author
-        };
-        await scoreService.UpdateDataAsync(score);
+        await scoreService.UpdateDataAsync(dto);
         return Ok();
     }
 
