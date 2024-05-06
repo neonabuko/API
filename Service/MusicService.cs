@@ -19,7 +19,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
     public async Task<T> GetDataByNameAsync(string name)
     {
         var music = await musicRepository.GetByNameAsync(name);
-        return music;
+        return music.GetValueOrThrow();
     }
 
     public FileStream GetFileByNameAsync(string name)
@@ -58,7 +58,8 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
 
     public async Task UpdateDataAsync(MusicEditDto dto)
     {
-        var toUpdate = await musicRepository.GetByNameAsync(dto.Name);
+        var music = await musicRepository.GetByNameAsync(dto.Name);
+        var toUpdate = music.GetValueOrThrow();
         toUpdate.Title = dto.Title ?? toUpdate.Title;
         toUpdate.Author = dto.Author ?? toUpdate.Author;
         await musicRepository.UpdateAsync(toUpdate);

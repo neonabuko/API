@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace ScoreHubAPI.Controllers.ErrorHandling;
 
@@ -36,17 +37,17 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         {
             code = HttpStatusCode.BadRequest;
             var errorMessage = argNullEx.ParamName is not null
-                ? $"Parameter '{argNullEx.ParamName}' cannot be null."
+                ? $"Parameter '{argNullEx.ParamName}' must be provided."
                 : "A required parameter was missing.";
 
             result = JsonSerializer.Serialize(new
             {
                 title = errorMessage,
                 status = (int)code,
-                errors = new Dictionary<string, List<string>> { { argNullEx.ParamName, new List<string> { errorMessage } } }
+                errors = new Dictionary<string, string> {{ "Title", errorMessage }}
             });
         }
-        else if (ex is ConflictException e) // Custom exception for conflicts
+        else if (ex is ConflictException e)
         {
             code = HttpStatusCode.Conflict;
             var errorMessage = e.Message;
@@ -55,7 +56,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             {
                 title = errorMessage,
                 status = (int)code,
-                errors = new Dictionary<string, List<string>> { { "Conflict", new List<string> { errorMessage } } }
+                errors = new Dictionary<string, string> {{ "Title", errorMessage }}
             });
         }
         else if (ex is ValidationException validationEx)
@@ -65,28 +66,13 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             {
                 title = validationEx.Message,
                 status = (int)code,
-                errors = GetValidationErrors(validationEx)
+                errors = new Dictionary<string, string> {{ "Title", validationEx.Message }}
             });
         }
 
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = (int)code;
         return context.Response.WriteAsync(result);
-    }
-
-    private static Dictionary<string, List<string>> GetValidationErrors(ValidationException validationEx)
-    {
-        var errors = new Dictionary<string, List<string>>();
-        foreach (var error in validationEx.ValidationResult.MemberNames)
-        {
-            if (!errors.ContainsKey(error))
-            {
-                errors[error] = new List<string>();
-            }
-            errors[error].Add(validationEx.ValidationResult.ErrorMessage);
-        }
-
-        return errors;
     }
 }
 

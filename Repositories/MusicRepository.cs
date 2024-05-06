@@ -14,9 +14,14 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
     }
 
     public async Task<ICollection<T>> GetAllAsync() => await _dbSet.ToListAsync();
-    
-    public async Task<T> GetByNameAsync(string name) => await _dbSet.FirstOrDefaultAsync(m => m.Name == name)
-    ?? throw new NullReferenceException($"'{name}' not found in repository.");
+
+    public async Task<Optional<T>> GetByNameAsync(string name)
+    {
+        var music = await _dbSet.FirstOrDefaultAsync(m => m.Name == name);
+#pragma warning disable CS8604 // Possible null reference argument.
+        return Optional<T>.FromNullable(music);
+#pragma warning restore CS8604 // Possible null reference argument.
+    }
 
     public async Task UpdateAsync(T music)
     {
@@ -27,9 +32,10 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
     public async Task DeleteAsync(string name)
     {
         var music = await GetByNameAsync(name);
-        if (music != null) {
-            _dbSet.Remove(music);
+        if (music.HasValue)
+        {
+            _dbSet.Remove(music.GetValueOrThrow());
             await _context.SaveChangesAsync();
         }
-    }    
+    }
 }
