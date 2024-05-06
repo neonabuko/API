@@ -16,12 +16,12 @@ public class MusicRules<T>(IMusicRepository<T> musicRepository) : IMusicRules<T>
         var name = music.Name;
         if (string.IsNullOrWhiteSpace(name) || name == "undefined")
         {
-            throw new ArgumentNullException(nameof(music), "Must provide file");
+            throw new ArgumentNullException(nameof(music), "Must provide file.");
         }
         try
         {
             var existent = await musicRepository.GetByNameAsync(name);
-            throw new ConflictException("Music already exists");
+            throw new ConflictException("Music already exists.");
         }
         catch (NullReferenceException){}
     }

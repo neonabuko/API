@@ -29,7 +29,7 @@ public class SongController(SongService songService, SongRules songRules) : Cont
     }
 
     [HttpGet("{name}")]
-    public IActionResult Stream(string name) => songService.Stream(Request, Response, name);    
+    public IActionResult Stream(string name) => songService.Stream(Request, Response, name);
 
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)
@@ -41,19 +41,8 @@ public class SongController(SongService songService, SongRules songRules) : Cont
             Author = dto.Author ?? "Unknown",
             Duration = dto.Duration
         };
-        try
-        {
-            await songRules.HandleSave(song);
-        }
-        catch (ArgumentNullException e)
-        {
-            return BadRequest(e.Message);
-        }
-        catch (DbUpdateException e)
-        {
-            return Conflict(e.Message);
-        }
 
+        await songRules.HandleSave(song);
         await songService.SaveDataAsync(song);
         return Ok();
     }

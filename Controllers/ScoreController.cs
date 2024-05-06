@@ -42,8 +42,8 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
             Title = dto.Title,
             Author = dto.Author ?? "Unknown"
         };
-        await scoreRules.HandleSave(score);
 
+        await scoreRules.HandleSave(score);
         await scoreService.SaveDataAsync(score);
         return Ok();
     }
