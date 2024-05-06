@@ -14,6 +14,17 @@ public static class EntityExtensions
         );
     }
 
+    public static Song AsSong(this SongDto dto)
+    {
+        return new() 
+        {
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown",
+            Duration = dto.Duration
+        };
+    }
+
     public static ScoreViewDto AsViewDto(this Score score)
     {
         return new ScoreViewDto(
@@ -21,5 +32,15 @@ public static class EntityExtensions
             score.Title,
             score.Author
         );
+    }
+
+    public static Score AsScore(this ScoreDto dto)
+    {
+        return new()
+        {
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown"
+        };
     }
 }

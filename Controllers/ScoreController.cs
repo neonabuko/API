@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
-using Microsoft.EntityFrameworkCore;
-using ScoreHubAPI.Entities;
 using ScoreHubAPI.Rules;
+using ScoreHubAPI.Entities.Extensions;
 
 namespace ScoreHubAPI.Controllers;
 
@@ -36,14 +35,8 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] ScoreDto dto)
     {
-        Score score = new()
-        {
-            Name = dto.Name,
-            Title = dto.Title,
-            Author = dto.Author ?? "Unknown"
-        };
-
-        await scoreRules.HandleSave(score);
+        var score = dto.AsScore();
+        await scoreRules.HandleSaveAsync(score);
         await scoreService.SaveDataAsync(score);
         return Ok();
     }
@@ -52,39 +45,23 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
     public async Task<IActionResult> SaveFileAsync([FromForm] ChunkDto dto)
     {
         await scoreService.SaveFileAsync(dto);
-        return StatusCode(202, "Stored chunk " + dto.Id);
+        return Ok();
     }
 
     [HttpPost("json")]
     public async Task<IActionResult> SaveJsonAsync(ScoreDto dto)
     {
-        Score score = new()
-        {
-            Name = dto.Name,
-            Title = dto.Title,
-            Author = dto.Author ?? "Unknown"
-        };
-        try
-        {
-            await scoreService.SaveJsonAsync(
-                score,
-                dto.Content ?? throw new ArgumentNullException(nameof(dto), "Must provide content")
-            );
-        }
-        catch (DbUpdateException e)
-        {
-            return Conflict(e.Message);
-        }
-        catch (ArgumentNullException e)
-        {
-            return BadRequest(e.Message);
-        }
+        var score = dto.AsScore();
+        await scoreRules.HandleSaveAsync(score);
+        if (dto.Content == null) return BadRequest("Must provide content.");
+        await scoreService.SaveJsonAsync(score, dto.Content);
         return Ok();
     }
 
     [HttpPatch("data")]
     public async Task<IActionResult> UpdateDataAsync([FromForm] MusicEditDto dto)
     {
+        scoreRules.HandleUpdateData(dto);
         await scoreService.UpdateDataAsync(dto);
         return Ok();
     }

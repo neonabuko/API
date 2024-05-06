@@ -3,7 +3,6 @@ using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
 using ScoreHubAPI.Entities.Extensions;
 using ScoreHubAPI.Entities;
-using Microsoft.EntityFrameworkCore;
 using ScoreHubAPI.Rules;
 
 namespace ScoreHubAPI.Controllers;
@@ -12,7 +11,6 @@ namespace ScoreHubAPI.Controllers;
 [Route("/songs")]
 public class SongController(SongService songService, SongRules songRules) : ControllerBase
 {
-
     [HttpGet]
     public async Task<IActionResult> GetAllDataAsync()
     {
@@ -34,15 +32,8 @@ public class SongController(SongService songService, SongRules songRules) : Cont
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)
     {
-        Song song = new()
-        {
-            Name = dto.Name,
-            Title = dto.Title,
-            Author = dto.Author ?? "Unknown",
-            Duration = dto.Duration
-        };
-
-        await songRules.HandleSave(song);
+        var song = dto.AsSong();
+        await songRules.HandleSaveAsync(song);
         await songService.SaveDataAsync(song);
         return Ok();
     }
@@ -58,6 +49,7 @@ public class SongController(SongService songService, SongRules songRules) : Cont
     [HttpPatch("data")]
     public async Task<IActionResult> UpdateDataAsync([FromForm] MusicEditDto dto)
     {
+        songRules.HandleUpdateData(dto);
         await songService.UpdateDataAsync(dto);
         return Ok();
     }
