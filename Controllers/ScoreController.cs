@@ -15,20 +15,21 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
     public async Task<IActionResult> GetAllDataAsync()
     {
         var scores = await scoreService.GetAllDataAsync();
-        return Ok(scores);
+        var scoresAsDto = scores.Select(s => s.AsViewDto());
+        return Ok(scoresAsDto);
     }
 
     [HttpGet("{name}/data")]
     public async Task<IActionResult> GetDataByNameAsync(string name)
     {
         var score = await scoreService.GetDataByNameAsync(name);
-        return Ok(score);
+        return Ok(score.AsViewDto());
     }
 
     [HttpGet("{name}")]
-    public IActionResult GetFileByNameAsync(string name)
+    public async Task<IActionResult> GetFileByNameAsync(string name)
     {
-        var score = scoreService.GetFileByNameAsync(name);
+        var score = await scoreService.GetFileByNameAsync(name);
         return new FileStreamResult(score, "application/vnd.recordare.musicxml+xml");
     }
 

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace ScoreHubAPI.Controllers.ErrorHandling;
 
@@ -25,54 +24,30 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
 
     private static Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        HttpStatusCode code = HttpStatusCode.InternalServerError;
-        string result = JsonSerializer.Serialize(new
+        var (statusCode, errorMessage) = ex switch
         {
-            title = "An error occurred. Please try again later.",
-            status = (int)code,
-            errors = new Dictionary<string, List<string>>()
-        });
+            ArgumentNullException argNullEx => (HttpStatusCode.BadRequest, argNullEx.Message),
+            ConflictException conflictEx => (HttpStatusCode.Conflict, conflictEx.Message),
+            ValidationException validationEx => (HttpStatusCode.BadRequest, validationEx.Message),
+            _ => (HttpStatusCode.InternalServerError, "An error occurred. Please try again later.")
+        };
 
-        if (ex is ArgumentNullException argNullEx)
-        {
-            code = HttpStatusCode.BadRequest;
-            var errorMessage = argNullEx.ParamName is not null
-                ? $"Parameter '{argNullEx.ParamName}' must be provided."
-                : "A required parameter was missing.";
-
-            result = JsonSerializer.Serialize(new
-            {
-                title = errorMessage,
-                status = (int)code,
-                errors = new Dictionary<string, string> {{ "Title", errorMessage }}
-            });
-        }
-        else if (ex is ConflictException e)
-        {
-            code = HttpStatusCode.Conflict;
-            var errorMessage = e.Message;
-
-            result = JsonSerializer.Serialize(new
-            {
-                title = errorMessage,
-                status = (int)code,
-                errors = new Dictionary<string, string> {{ "Title", errorMessage }}
-            });
-        }
-        else if (ex is ValidationException validationEx)
-        {
-            code = HttpStatusCode.BadRequest;
-            result = JsonSerializer.Serialize(new
-            {
-                title = validationEx.Message,
-                status = (int)code,
-                errors = new Dictionary<string, string> {{ "Title", validationEx.Message }}
-            });
-        }
+        var responseContent = CreateErrorResponse(statusCode, errorMessage);
 
         context.Response.ContentType = "application/problem+json";
-        context.Response.StatusCode = (int)code;
-        return context.Response.WriteAsync(result);
+        context.Response.StatusCode = (int)statusCode;
+
+        return context.Response.WriteAsync(JsonSerializer.Serialize(responseContent));
+    }
+
+    private static object CreateErrorResponse(HttpStatusCode statusCode, string errorMessage)
+    {
+        return new
+        {
+            title = errorMessage,
+            Status = (int)statusCode,
+            errors = new Dictionary<string, string> { { "Title", errorMessage } }
+        };
     }
 }
 

@@ -5,7 +5,7 @@ using ScoreHubAPI.Repositories;
 
 namespace ScoreHubAPI.Service;
 
-public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicPath) 
+public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicPath)
 : IMusicService<T> where T : Music
 {
     private readonly string[] allowedScoreExtensions = [".mei", ".musicxml"];
@@ -22,12 +22,19 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return music.GetValueOrThrow();
     }
 
-    public FileStream GetFileByNameAsync(string name)
+    public async Task<FileStream> GetFileByNameAsync(string name)
     {
-        string path = Path.Combine(_musicPath, name);
-        var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-        return fileStream;
+        return await Task.Run(() =>
+        {
+            string path = Path.Combine(_musicPath, name);
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+        });
     }
+
 
     public async Task SaveDataAsync(T music)
     {
@@ -126,5 +133,5 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
                 await Task.Run(() => File.Delete(chunkFileName));
             }
         }
-    }    
+    }
 }

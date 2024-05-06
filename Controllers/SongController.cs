@@ -11,7 +11,7 @@ namespace ScoreHubAPI.Controllers;
 [Route("/songs")]
 public class SongController(SongService songService, SongRules songRules) : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("data")]
     public async Task<IActionResult> GetAllDataAsync()
     {
         var songs = await songService.GetAllDataAsync();
@@ -27,7 +27,7 @@ public class SongController(SongService songService, SongRules songRules) : Cont
     }
 
     [HttpGet("{name}")]
-    public IActionResult Stream(string name) => songService.Stream(Request, Response, name);
+    public async Task<IActionResult> Stream(string name) => await songService.Stream(Request, Response, name);
 
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)

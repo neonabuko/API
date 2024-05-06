@@ -7,7 +7,7 @@ public interface IMusicService<T> where T : Music
 {
     Task<ICollection<T>> GetAllDataAsync();
     Task<T> GetDataByNameAsync(string name);
-    FileStream GetFileByNameAsync(string name);
+    Task<FileStream> GetFileByNameAsync(string name);
     Task SaveDataAsync(T music);
     Task SaveFileAsync(ChunkDto dto);
     Task UpdateDataAsync(MusicEditDto music);
