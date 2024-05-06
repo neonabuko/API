@@ -4,5 +4,5 @@ public record ScoreDto(
     string Name,
     string Title,
     string? Author,
-    string Content
+    string? Content
 );

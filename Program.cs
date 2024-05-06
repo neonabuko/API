@@ -1,3 +1,4 @@
+using ScoreHubAPI.Controllers.ErrorHandling;
 using ScoreHubAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ app.UseSwaggerUI();
 app.UseRouting();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllerRoute(
     "default",

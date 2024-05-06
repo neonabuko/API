@@ -2,6 +2,7 @@
 using ScoreHubAPI.Repositories;
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities;
+using ScoreHubAPI.Rules;
 
 namespace ScoreHubAPI.Data;
 
@@ -36,6 +37,13 @@ public static class ServiceConfiguration
         
         services.AddScoped<SongService>(sp => new SongService(
             sp.GetRequiredService<IMusicRepository<Song>>(), songsPath ?? throw new NullReferenceException()
+        ));
+
+        services.AddScoped<SongRules>(sr => new SongRules(
+            sr.GetRequiredService<IMusicRepository<Song>>()
+        ));
+        services.AddScoped<ScoreRules>(sr => new ScoreRules(
+            sr.GetRequiredService<IMusicRepository<Score>>()
         ));
 
         services.AddCors(options =>

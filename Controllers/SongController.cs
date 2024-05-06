@@ -3,12 +3,14 @@ using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
 using ScoreHubAPI.Entities.Extensions;
 using ScoreHubAPI.Entities;
+using Microsoft.EntityFrameworkCore;
+using ScoreHubAPI.Rules;
 
 namespace ScoreHubAPI.Controllers;
 
 [ApiController]
 [Route("/songs")]
-public class SongController(SongService songService) : ControllerBase
+public class SongController(SongService songService, SongRules songRules) : ControllerBase
 {
 
     [HttpGet]
@@ -39,6 +41,19 @@ public class SongController(SongService songService) : ControllerBase
             Author = dto.Author ?? "Unknown",
             Duration = dto.Duration
         };
+        try
+        {
+            await songRules.HandleSave(song);
+        }
+        catch (ArgumentNullException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (DbUpdateException e)
+        {
+            return Conflict(e.Message);
+        }
+
         await songService.SaveDataAsync(song);
         return Ok();
     }

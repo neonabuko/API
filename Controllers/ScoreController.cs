@@ -3,12 +3,13 @@ using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
 using Microsoft.EntityFrameworkCore;
 using ScoreHubAPI.Entities;
+using ScoreHubAPI.Rules;
 
 namespace ScoreHubAPI.Controllers;
 
 [ApiController]
 [Route("/scores")]
-public class ScoreController(ScoreService scoreService) : ControllerBase
+public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) : ControllerBase
 {
 
     [HttpGet("data")]
@@ -35,20 +36,15 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] ScoreDto dto)
     {
-        try
+        Score score = new()
         {
-            Score score = new()
-            {
-                Name = dto.Name,
-                Title = dto.Title,
-                Author = dto.Author ?? "Unknown"
-            };
-            await scoreService.SaveDataAsync(score);
-        }
-        catch (DbUpdateException e)
-        {
-            return StatusCode(409, e.Message);
-        }
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown"
+        };
+        await scoreRules.HandleSave(score);
+
+        await scoreService.SaveDataAsync(score);
         return Ok();
     }
 
@@ -62,19 +58,26 @@ public class ScoreController(ScoreService scoreService) : ControllerBase
     [HttpPost("json")]
     public async Task<IActionResult> SaveJsonAsync(ScoreDto dto)
     {
+        Score score = new()
+        {
+            Name = dto.Name,
+            Title = dto.Title,
+            Author = dto.Author ?? "Unknown"
+        };
         try
         {
-            Score score = new()
-            {
-                Name = dto.Name,
-                Title = dto.Title,
-                Author = dto.Author ?? "Unknown"
-            };
-            await scoreService.SaveJsonAsync(score, dto.Content);
+            await scoreService.SaveJsonAsync(
+                score,
+                dto.Content ?? throw new ArgumentNullException(nameof(dto), "Must provide content")
+            );
         }
         catch (DbUpdateException e)
         {
-            return StatusCode(409, e.Message);
+            return Conflict(e.Message);
+        }
+        catch (ArgumentNullException e)
+        {
+            return BadRequest(e.Message);
         }
         return Ok();
     }
