@@ -10,7 +10,8 @@ public static class EntityExtensions
             song.Name,
             song.Title,
             song.Author,
-            song.Duration
+            song.Duration,
+            song.PublishedAt
         );
     }
 
@@ -21,7 +22,8 @@ public static class EntityExtensions
             Name = dto.Name,
             Title = dto.Title,
             Author = dto.Author ?? "Unknown",
-            Duration = dto.Duration
+            Duration = dto.Duration,
+            PublishedAt = dto.PublishedAt
         };
     }
 
@@ -30,7 +32,8 @@ public static class EntityExtensions
         return new ScoreViewDto(
             score.Name,
             score.Title,
-            score.Author
+            score.Author,
+            score.PublishedAt
         );
     }
 
@@ -40,7 +43,8 @@ public static class EntityExtensions
         {
             Name = dto.Name,
             Title = dto.Title,
-            Author = dto.Author ?? "Unknown"
+            Author = dto.Author ?? "Unknown",
+            PublishedAt = dto.PublishedAt
         };
     }
 }

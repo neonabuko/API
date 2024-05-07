@@ -7,13 +7,22 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
 {
     protected readonly DbSet<T> _dbSet = _context.Set<T>();
 
-    public async Task CreateAsync(T music)
+    public async Task<int> CreateAsync(T music)
     {
         await _dbSet.AddAsync(music);
         await _context.SaveChangesAsync();
+        return music.Id;
     }
 
     public async Task<ICollection<T>> GetAllAsync() => await _dbSet.ToListAsync();
+
+    public async Task<Optional<T>> GetByIdAsync(int id)
+    {
+        var music = await _dbSet.FindAsync(id);
+#pragma warning disable CS8604 // Possible null reference argument.
+        return Optional<T>.FromNullable(music);
+#pragma warning restore CS8604 // Possible null reference argument.
+    }
 
     public async Task<Optional<T>> GetByNameAsync(string name)
     {

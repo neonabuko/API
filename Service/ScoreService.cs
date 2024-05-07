@@ -6,9 +6,9 @@ namespace ScoreHubAPI.Service;
 public class ScoreService(IMusicRepository<Score> scoreRepository, string _scoresPath)
 : MusicService<Score>(scoreRepository, _scoresPath)
 {
-    public async Task SaveJsonAsync(Score score, string content)
+    public async Task SaveFromJsonAsync(Score score, string content)
     {
         await SaveDataAsync(score);
-        await SaveScoreContentAsync(score.Name, content);
+        await WriteFromJsonAsync(score.Name, content);
     }
 }

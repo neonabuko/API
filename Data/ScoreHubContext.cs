@@ -11,13 +11,5 @@ public class ScoreHubContext(DbContextOptions<ScoreHubContext> options) : DbCont
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
-        modelBuilder.Entity<Song>()
-        .HasIndex(s => s.Name)
-        .IsUnique();
-
-        modelBuilder.Entity<Score>()
-        .HasIndex(s => s.Name)
-        .IsUnique();
     }
 }

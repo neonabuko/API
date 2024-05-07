@@ -39,12 +39,15 @@ public static class ServiceConfiguration
             sp.GetRequiredService<IMusicRepository<Song>>(), songsPath ?? throw new NullReferenceException()
         ));
 
-        services.AddScoped<SongRules>(sr => new SongRules(
-            sr.GetRequiredService<IMusicRepository<Song>>()
-        ));
-        services.AddScoped<ScoreRules>(sr => new ScoreRules(
-            sr.GetRequiredService<IMusicRepository<Score>>()
-        ));
+        // services.AddScoped<SongRules>(sr => new SongRules(
+        //     sr.GetRequiredService<IMusicRepository<Song>>()
+        // ));
+        // services.AddScoped<ScoreRules>(sr => new ScoreRules(
+        //     sr.GetRequiredService<IMusicRepository<Score>>()
+        // ));
+
+        services.AddScoped<SongRules>();
+        services.AddScoped<ScoreRules>();
 
         services.AddCors(options =>
         {

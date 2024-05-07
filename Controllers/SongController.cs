@@ -33,9 +33,9 @@ public class SongController(SongService songService, SongRules songRules) : Cont
     public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)
     {
         var song = dto.AsSong();
-        await songRules.HandleSaveAsync(song);
-        await songService.SaveDataAsync(song);
-        return Ok();
+        songRules.HandleSaveAsync(song);
+        var songId = await songService.SaveDataAsync(song);
+        return Ok(songId);
     }
 
     [HttpPost("chunks")]

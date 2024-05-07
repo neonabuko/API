@@ -37,9 +37,9 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
     public async Task<IActionResult> SaveDataAsync([FromForm] ScoreDto dto)
     {
         var score = dto.AsScore();
-        await scoreRules.HandleSaveAsync(score);
-        await scoreService.SaveDataAsync(score);
-        return Ok();
+        scoreRules.HandleSaveAsync(score);
+        var scoreId = await scoreService.SaveDataAsync(score);
+        return Ok(scoreId);
     }
 
     [HttpPost("chunks")]
@@ -50,12 +50,12 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
     }
 
     [HttpPost("json")]
-    public async Task<IActionResult> SaveJsonAsync(ScoreDto dto)
+    public async Task<IActionResult> SaveFromJsonAsync(ScoreDto dto)
     {
         var score = dto.AsScore();
-        await scoreRules.HandleSaveAsync(score);
+        scoreRules.HandleSaveAsync(score);
         if (dto.Content == null) return BadRequest("Must provide content.");
-        await scoreService.SaveJsonAsync(score, dto.Content);
+        await scoreService.SaveFromJsonAsync(score, dto.Content);
         return Ok();
     }
 

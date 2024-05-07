@@ -26,7 +26,8 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
     {
         return await Task.Run(() =>
         {
-            string path = Path.Combine(_musicPath, name);
+            var nameNoExtension = Path.GetFileNameWithoutExtension(name);
+            string path = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException("File not found", path);
@@ -36,19 +37,27 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
     }
 
 
-    public async Task SaveDataAsync(T music)
+    public async Task<int> SaveDataAsync(T music)
     {
-        await musicRepository.CreateAsync(music);
+        var musicId = await musicRepository.CreateAsync(music);
+        return musicId;
     }
 
-    public async Task SaveScoreContentAsync(string name, string content)
+    public async Task WriteFromJsonAsync(string name, string content)
     {
         var extension = Path.GetExtension(name).ToLowerInvariant();
         if (!Array.Exists(allowedScoreExtensions, ext => ext == extension))
         {
             throw new ArgumentException($"Invalid file extension '{extension}'.");
         }
-        var outputFilePath = Path.Combine(_musicPath, $"{name}");
+        var nameNoExtension = Path.GetFileNameWithoutExtension(name);
+        var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
+        var outputFilePath = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
+        
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }                
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         var byteData = Encoding.UTF8.GetBytes(content);
         await outputFileStream.WriteAsync(byteData);
@@ -59,7 +68,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         await SaveChunkAsync(dto.Name, dto.Id, dto.TotalChunks, dto.Data);
         if (await IsFileCompleteAsync(dto.Name, dto.TotalChunks))
         {
-            await ReconstructFileAsync(dto.Name, dto.TotalChunks);
+            await ReconstructFileAsync(dto.Name, dto.TotalChunks, dto.MusicId);
         }
     }
 
@@ -75,26 +84,35 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
     public async Task DeleteAsync(string name)
     {
         await musicRepository.DeleteAsync(name);
-        var path = Path.Combine($"{_musicPath}/{name}");
-        if (File.Exists(path))
+        var nameNoExtension = Path.GetFileNameWithoutExtension(name);
+        var path = Path.Combine($"{_musicPath}/{nameNoExtension}");
+        if (Directory.Exists(path))
         {
-            File.Delete(path);
+            Directory.Delete(path, recursive: true);
         }
     }
 
-    public async Task SaveChunkAsync(string fileIdentifier, int chunkNumber, int totalChunks, IFormFile chunkData)
-    {
-        string chunkFilePath = GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks);
-        await using var fileStream = new FileStream(chunkFilePath, FileMode.Create, FileAccess.Write);
-        await chunkData.CopyToAsync(fileStream);
-    }
-
-    public string GetChunkFilePath(string fileIdentifier, int chunkNumber, int totalChunks)
+    public string GetChunkFilePath(string fileName, int chunkNumber, int totalChunks)
     {
         int numberOfDigits = totalChunks.ToString().Length;
 
         string paddedChunkNumber = chunkNumber.ToString($"D{numberOfDigits}");
-        return Path.Combine($"{_musicPath}/tmp", $"{fileIdentifier}_chunk_{paddedChunkNumber}.tmp");
+        var fileNameNoExtension = Path.GetFileNameWithoutExtension(fileName);
+        return Path.Combine($"{_musicPath}/tmp/{fileNameNoExtension}", $"{fileName}_chunk_{paddedChunkNumber}.tmp");
+    }
+
+    public async Task SaveChunkAsync(string fileName, int chunkNumber, int totalChunks, IFormFile chunkData)
+    {
+        string chunkFilePath = GetChunkFilePath(fileName, chunkNumber, totalChunks);
+
+        var chunkDirectory = Path.GetDirectoryName(chunkFilePath);
+        if (!Directory.Exists(chunkDirectory))
+        {
+            Directory.CreateDirectory(chunkDirectory);
+        }
+
+        await using var fileStream = new FileStream(chunkFilePath, FileMode.Create, FileAccess.Write);
+        await chunkData.CopyToAsync(fileStream);
     }
 
     public async Task<bool> IsFileCompleteAsync(string fileIdentifier, int totalChunks)
@@ -104,34 +122,43 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return await Task.Run(() => chunkFileNames.All(File.Exists));
     }
 
-    public async Task ReconstructFileAsync(string fileIdentifier, int totalChunks)
+    public async Task ReconstructFileAsync(string fileName, int totalChunks, int musicId)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
-                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks))
+                                        .Select(chunkNumber => GetChunkFilePath(fileName, chunkNumber, totalChunks))
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
-        var outputFilePath = Path.Combine($"{_musicPath}/{fileIdentifier}");
+        var nameNoExtension = Path.GetFileNameWithoutExtension(fileName);
+        var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
+        if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+
+        var fileFromRepository = await musicRepository.GetByIdAsync(musicId);
+        var publishedAt = fileFromRepository.GetValueOrDefault().PublishedAt;
+        var fileNameWithPublishedAt = GetFileNameWithPublishedAt(fileName, publishedAt);
+        var outputFilePath = Path.Combine(outputDirectory, fileNameWithPublishedAt);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         foreach (var chunkFilePath in chunkFileNames)
         {
             await using var chunkFileStream = new FileStream(chunkFilePath, FileMode.Open, FileAccess.Read);
             await chunkFileStream.CopyToAsync(outputFileStream);
         }
-        await DeleteTempChunksAsync(fileIdentifier, totalChunks);
+        var chunksDir = Path.Combine($"{_musicPath}/tmp/{nameNoExtension}");
+        await DeleteTempChunksDirectoryAsync(chunksDir);
     }
 
-    public async Task DeleteTempChunksAsync(string fileIdentifier, int totalChunks)
+    public async Task DeleteTempChunksDirectoryAsync(string directory)
     {
-        var chunkFileNames = Enumerable.Range(1, totalChunks)
-                                        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks))
-                                        .OrderBy(chunkFilePath => chunkFilePath);
-
-        foreach (var chunkFileName in chunkFileNames)
-        {
-            if (File.Exists(chunkFileName))
-            {
-                await Task.Run(() => File.Delete(chunkFileName));
-            }
+        if (Directory.Exists(directory)) {
+            await Task.Run(() => Directory.Delete(directory, recursive: true));
         }
+    }
+
+    public string GetFileNameWithPublishedAt(string fileName, DateTime publishedAt)
+    {
+        var fileNameNoExtension = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+        var publishedAtFormatted = publishedAt.ToString("yyyyMMdd_HHmmss");
+        var nameWithPublishedAt = $"{fileNameNoExtension}_{publishedAtFormatted}{extension}";
+        return nameWithPublishedAt;
     }
 }
