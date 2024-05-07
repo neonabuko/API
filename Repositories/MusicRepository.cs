@@ -16,7 +16,7 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
 
     public async Task<ICollection<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
-    public async Task<Optional<T>> GetByIdAsync(int id)
+    public async Task<Optional<T>> GetAsync(int id)
     {
         var music = await _dbSet.FindAsync(id);
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -38,7 +38,16 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(string name)
+    public async Task DeleteAsync(int id)
+    {
+        var music = await GetAsync(id);
+        if (music.HasValue) {
+            _dbSet.Remove(music.GetValueOrThrow());
+            await _context.SaveChangesAsync();            
+        }
+    }
+
+    public async Task DeleteByNameAsync(string name)
     {
         var music = await GetByNameAsync(name);
         if (music.HasValue)

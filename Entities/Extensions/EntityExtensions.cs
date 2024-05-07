@@ -7,6 +7,7 @@ public static class EntityExtensions
     public static SongDto AsDto(this Song song) 
     {
         return new SongDto(
+            song.Id,
             song.Name,
             song.Title,
             song.Author,
@@ -30,6 +31,7 @@ public static class EntityExtensions
     public static ScoreViewDto AsViewDto(this Score score)
     {
         return new ScoreViewDto(
+            score.Id,
             score.Name,
             score.Title,
             score.Author,

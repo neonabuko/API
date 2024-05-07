@@ -22,6 +22,12 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return music.GetValueOrThrow();
     }
 
+    public async Task<T> GetDataByIdAsync(int id)
+    {
+        var music = await musicRepository.GetAsync(id);
+        return music.GetValueOrThrow();
+    }
+
     public async Task<FileStream> GetFileByNameAsync(string name)
     {
         return await Task.Run(() =>
@@ -81,15 +87,16 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         await musicRepository.UpdateAsync(toUpdate);
     }
 
-    public async Task DeleteAsync(string name)
+    public async Task DeleteAsync(int id)
     {
-        await musicRepository.DeleteAsync(name);
-        var nameNoExtension = Path.GetFileNameWithoutExtension(name);
-        var path = Path.Combine($"{_musicPath}/{nameNoExtension}");
-        if (Directory.Exists(path))
-        {
-            Directory.Delete(path, recursive: true);
-        }
+        var music = await musicRepository.GetAsync(id);
+        var musicName = music.GetValueOrThrow().Name;
+        var musicNameNoExtension = Path.GetFileNameWithoutExtension(musicName);
+        var musicDir = Path.Combine(_musicPath, musicNameNoExtension);
+        var musicPath = Path.Combine(musicDir, $"{id}.mp3");
+        if (File.Exists(musicPath)) File.Delete(musicPath);
+
+        await musicRepository.DeleteAsync(id);
     }
 
     public string GetChunkFilePath(string fileName, int chunkNumber, int totalChunks)
@@ -103,7 +110,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
 
     public async Task SaveChunkAsync(string fileName, int chunkNumber, int totalChunks, IFormFile chunkData)
     {
-        string chunkFilePath = GetChunkFilePath(fileName, chunkNumber, totalChunks);
+        var chunkFilePath = GetChunkFilePath(fileName, chunkNumber, totalChunks);
 
         var chunkDirectory = Path.GetDirectoryName(chunkFilePath);
         if (!Directory.Exists(chunkDirectory))
@@ -132,10 +139,8 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
         if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
-        var fileFromRepository = await musicRepository.GetByIdAsync(musicId);
-        var publishedAt = fileFromRepository.GetValueOrDefault().PublishedAt;
-        var fileNameWithPublishedAt = GetFileNameWithPublishedAt(fileName, publishedAt);
-        var outputFilePath = Path.Combine(outputDirectory, fileNameWithPublishedAt);
+        var fileIdentifier = $"{musicId}.mp3";
+        var outputFilePath = Path.Combine(outputDirectory, fileIdentifier);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         foreach (var chunkFilePath in chunkFileNames)
         {
@@ -151,14 +156,5 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         if (Directory.Exists(directory)) {
             await Task.Run(() => Directory.Delete(directory, recursive: true));
         }
-    }
-
-    public string GetFileNameWithPublishedAt(string fileName, DateTime publishedAt)
-    {
-        var fileNameNoExtension = Path.GetFileNameWithoutExtension(fileName);
-        var extension = Path.GetExtension(fileName);
-        var publishedAtFormatted = publishedAt.ToString("yyyyMMdd_HHmmss");
-        var nameWithPublishedAt = $"{fileNameNoExtension}_{publishedAtFormatted}{extension}";
-        return nameWithPublishedAt;
     }
 }

@@ -26,6 +26,13 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
         return Ok(score.AsViewDto());
     }
 
+    [HttpGet("{id:int}/data")]
+    public async Task<IActionResult> GetDataByIdAsync(int id)
+    {
+        var score = await scoreService.GetDataByIdAsync(id);
+        return Ok(score.AsViewDto());
+    }
+
     [HttpGet("{name}")]
     public async Task<IActionResult> GetFileByNameAsync(string name)
     {
@@ -67,10 +74,10 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
         return Ok();
     }
 
-    [HttpDelete("{name}")]
-    public async Task<IActionResult> DeleteAsync(string name)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAsync(int id)
     {
-        await scoreService.DeleteAsync(name);
+        await scoreService.DeleteAsync(id);
         return Ok();
     }
 }

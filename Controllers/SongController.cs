@@ -26,6 +26,13 @@ public class SongController(SongService songService, SongRules songRules) : Cont
         return Ok(song.AsDto());
     }
 
+    [HttpGet("{id:int}/data")]
+    public async Task<IActionResult> GetDataByIdAsync(int id)
+    {
+        var song = await songService.GetDataByIdAsync(id);
+        return Ok(song.AsDto());
+    }
+
     [HttpGet("{name}")]
     public async Task<IActionResult> Stream(string name) => await songService.Stream(Request, Response, name);
 
@@ -54,10 +61,10 @@ public class SongController(SongService songService, SongRules songRules) : Cont
         return Ok();
     }
 
-    [HttpDelete("{name}")]
-    public async Task<IActionResult> DeleteAsync(string name)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAsync(int id)
     {
-        await songService.DeleteAsync(name);
+        await songService.DeleteAsync(id);
         return Ok();
     }
 }
