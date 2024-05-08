@@ -33,8 +33,8 @@ public class SongController(SongService songService, SongRules songRules) : Cont
         return Ok(song.AsDto());
     }
 
-    [HttpGet("{name}")]
-    public async Task<IActionResult> Stream(string name) => await songService.Stream(Request, Response, name);
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Stream(int id) => await songService.Stream(Request, Response, id);
 
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] SongDto dto)

@@ -28,6 +28,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return music.GetValueOrThrow();
     }
 
+    //Deprecated
     public async Task<FileStream> GetFileByNameAsync(string name)
     {
         return await Task.Run(() =>
@@ -42,6 +43,22 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         });
     }
 
+    public async Task<FileStream> GetFileByIdAsync(int id)
+    {
+        return await Task.Run(async () =>
+                {
+                    var fileName = $"{id}.mp3";
+                    var song = await musicRepository.GetAsync(id);
+                    var songName = song.GetValueOrThrow().Name;
+                    var songNameNoExtension = Path.GetFileNameWithoutExtension(songName);
+                    string path = Path.Combine($"{_musicPath}/{songNameNoExtension}", fileName);
+                    if (!File.Exists(path))
+                    {
+                        throw new FileNotFoundException("File not found", path);
+                    }
+                    return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+                });
+    }
 
     public async Task<int> SaveDataAsync(T music)
     {
@@ -59,11 +76,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         var nameNoExtension = Path.GetFileNameWithoutExtension(name);
         var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
         var outputFilePath = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
-        
+
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
-        }                
+        }
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         var byteData = Encoding.UTF8.GetBytes(content);
         await outputFileStream.WriteAsync(byteData);
@@ -153,7 +170,8 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
 
     public async Task DeleteTempChunksDirectoryAsync(string directory)
     {
-        if (Directory.Exists(directory)) {
+        if (Directory.Exists(directory))
+        {
             await Task.Run(() => Directory.Delete(directory, recursive: true));
         }
     }

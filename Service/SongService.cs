@@ -7,9 +7,9 @@ namespace ScoreHubAPI.Service;
 public class SongService(IMusicRepository<Song> songRepository, string _songsPath)
 : MusicService<Song>(songRepository, _songsPath)
 {
-    public async Task<FileStreamResult> Stream(HttpRequest request, HttpResponse response, string name)
+    public async Task<FileStreamResult> Stream(HttpRequest request, HttpResponse response, int id)
     {
-        var fileStream = await GetFileByNameAsync(name);
+        var fileStream = await GetFileByIdAsync(id);
 
         if (request.Headers.TryGetValue("Range", out var rangeValues))
         {
