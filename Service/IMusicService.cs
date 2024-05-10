@@ -15,7 +15,7 @@ public interface IMusicService<T> where T : Music
     Task DeleteAsync(int id);
 
     // Chunk operations
-    Task SaveChunkAsync(string fileIdentifier, int chunkNumber, int totalChunks, IFormFile chunkData);
+    Task SaveChunkAsync(ChunkDto dto);
     Task<bool> IsFileCompleteAsync(string fileIdentifier, int totalChunks);
     Task ReconstructFileAsync(string fileIdentifier, int totalChunks, int musicId);
     Task DeleteTempChunksDirectoryAsync(string directory);

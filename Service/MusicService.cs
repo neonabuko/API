@@ -88,7 +88,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
 
     public async Task SaveFileAsync(ChunkDto dto)
     {
-        await SaveChunkAsync(dto.Name, dto.Id, dto.TotalChunks, dto.Data);
+        await SaveChunkAsync(dto);
         if (await IsFileCompleteAsync(dto.Name, dto.TotalChunks))
         {
             await ReconstructFileAsync(dto.Name, dto.TotalChunks, dto.MusicId);
@@ -125,24 +125,25 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return Path.Combine($"{_musicPath}/tmp/{fileNameNoExtension}", $"{fileName}_chunk_{paddedChunkNumber}.tmp");
     }
 
-    public async Task SaveChunkAsync(string fileName, int chunkNumber, int totalChunks, IFormFile chunkData)
+    public async Task SaveChunkAsync(ChunkDto dto)
     {
-        var chunkFilePath = GetChunkFilePath(fileName, chunkNumber, totalChunks);
+        var chunkFilePath = GetChunkFilePath(dto.Name, dto.Id, dto.TotalChunks);
 
         var chunkDirectory = Path.GetDirectoryName(chunkFilePath);
-        if (!Directory.Exists(chunkDirectory))
+        if (!Directory.Exists(chunkDirectory) && chunkDirectory != null)
         {
             Directory.CreateDirectory(chunkDirectory);
         }
 
         await using var fileStream = new FileStream(chunkFilePath, FileMode.Create, FileAccess.Write);
+        var chunkData = dto.Data;
         await chunkData.CopyToAsync(fileStream);
     }
 
-    public async Task<bool> IsFileCompleteAsync(string fileIdentifier, int totalChunks)
+    public async Task<bool> IsFileCompleteAsync(string fileName, int totalChunks)
     {
         var chunkFileNames = Enumerable.Range(1, totalChunks)
-        .Select(chunkNumber => GetChunkFilePath(fileIdentifier, chunkNumber, totalChunks));
+        .Select(chunkNumber => GetChunkFilePath(fileName, chunkNumber, totalChunks));
         return await Task.Run(() => chunkFileNames.All(File.Exists));
     }
 
