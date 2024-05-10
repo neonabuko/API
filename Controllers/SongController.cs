@@ -2,7 +2,6 @@
 using ScoreHubAPI.Service;
 using ScoreHubAPI.Entities.Dto;
 using ScoreHubAPI.Entities.Extensions;
-using ScoreHubAPI.Entities;
 using ScoreHubAPI.Rules;
 
 namespace ScoreHubAPI.Controllers;
@@ -17,13 +16,6 @@ public class SongController(SongService songService, SongRules songRules) : Cont
         var songs = await songService.GetAllDataAsync();
         var songsAsDto = songs.Select(s => s.AsDto()).ToList();
         return Ok(songsAsDto);
-    }
-
-    [HttpGet("{name}/data")]
-    public async Task<IActionResult> GetDataByNameAsync(string name)
-    {
-        var song = await songService.GetDataByNameAsync(name);
-        return Ok(song.AsDto());
     }
 
     [HttpGet("{id:int}/data")]

@@ -19,25 +19,11 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
         return Ok(scoresAsDto);
     }
 
-    [HttpGet("{name}/data")]
-    public async Task<IActionResult> GetDataByNameAsync(string name)
-    {
-        var score = await scoreService.GetDataByNameAsync(name);
-        return Ok(score.AsViewDto());
-    }
-
     [HttpGet("{id:int}/data")]
     public async Task<IActionResult> GetDataByIdAsync(int id)
     {
         var score = await scoreService.GetDataByIdAsync(id);
         return Ok(score.AsViewDto());
-    }
-
-    [HttpGet("{name}")]
-    public async Task<IActionResult> GetFileByNameAsync(string name)
-    {
-        var score = await scoreService.GetFileByNameAsync(name);
-        return new FileStreamResult(score, "application/vnd.recordare.musicxml+xml");
     }
 
     [HttpPost("data")]

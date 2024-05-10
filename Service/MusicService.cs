@@ -16,31 +16,10 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         return musics;
     }
 
-    public async Task<T> GetDataByNameAsync(string name)
-    {
-        var music = await musicRepository.GetByNameAsync(name);
-        return music.GetValueOrThrow();
-    }
-
     public async Task<T> GetDataByIdAsync(int id)
     {
         var music = await musicRepository.GetAsync(id);
         return music.GetValueOrThrow();
-    }
-
-    //Deprecated
-    public async Task<FileStream> GetFileByNameAsync(string name)
-    {
-        return await Task.Run(() =>
-        {
-            var nameNoExtension = Path.GetFileNameWithoutExtension(name);
-            string path = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException("File not found", path);
-            }
-            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
-        });
     }
 
     public async Task<FileStream> GetFileByIdAsync(int id)
@@ -75,12 +54,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         }
         var nameNoExtension = Path.GetFileNameWithoutExtension(name);
         var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
-        var outputFilePath = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
-
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
-        }
+        }        
+        var outputFilePath = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         var byteData = Encoding.UTF8.GetBytes(content);
         await outputFileStream.WriteAsync(byteData);
@@ -97,7 +75,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
 
     public async Task UpdateDataAsync(MusicEditDto dto)
     {
-        var music = await musicRepository.GetByNameAsync(dto.Name);
+        var music = await musicRepository.GetAsync(dto.Id);
         var toUpdate = music.GetValueOrThrow();
         toUpdate.Title = dto.Title ?? toUpdate.Title;
         toUpdate.Author = dto.Author ?? toUpdate.Author;

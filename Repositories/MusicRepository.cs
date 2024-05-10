@@ -24,14 +24,6 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
 #pragma warning restore CS8604 // Possible null reference argument.
     }
 
-    public async Task<Optional<T>> GetByNameAsync(string name)
-    {
-        var music = await _dbSet.FirstOrDefaultAsync(m => m.Name == name);
-#pragma warning disable CS8604 // Possible null reference argument.
-        return Optional<T>.FromNullable(music);
-#pragma warning restore CS8604 // Possible null reference argument.
-    }
-
     public async Task UpdateAsync(T music)
     {
         _dbSet.Update(music);
@@ -44,16 +36,6 @@ public class MusicRepository<T>(DbContext _context) : IMusicRepository<T> where 
         if (music.HasValue) {
             _dbSet.Remove(music.GetValueOrThrow());
             await _context.SaveChangesAsync();            
-        }
-    }
-
-    public async Task DeleteByNameAsync(string name)
-    {
-        var music = await GetByNameAsync(name);
-        if (music.HasValue)
-        {
-            _dbSet.Remove(music.GetValueOrThrow());
-            await _context.SaveChangesAsync();
         }
     }
 }
