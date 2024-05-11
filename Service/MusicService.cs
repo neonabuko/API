@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using ScoreHubAPI.Entities;
 using ScoreHubAPI.Entities.Dto;
 using ScoreHubAPI.Repositories;
@@ -87,10 +88,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         var music = await musicRepository.GetAsync(id);
         var musicName = music.GetValueOrThrow().Name;
         var musicNameNoExtension = Path.GetFileNameWithoutExtension(musicName);
+        var musicExtension = Path.GetExtension(musicName);
         var musicDir = Path.Combine(_musicPath, musicNameNoExtension);
-        var musicPath = Path.Combine(musicDir, $"{id}.mp3");
+        var musicPath = Path.Combine(musicDir, $"{id}{musicExtension}");
         if (File.Exists(musicPath)) File.Delete(musicPath);
-
+        if (!Directory.EnumerateFiles(musicDir).Any()) Directory.Delete(musicDir);
         await musicRepository.DeleteAsync(id);
     }
 
@@ -132,10 +134,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
                                         .OrderBy(chunkFilePath => chunkFilePath);
 
         var nameNoExtension = Path.GetFileNameWithoutExtension(fileName);
+        var fileExtension = Path.GetExtension(fileName);
         var outputDirectory = Path.Combine(_musicPath, nameNoExtension);
         if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
-        var fileIdentifier = $"{musicId}.mp3";
+        var fileIdentifier = $"{musicId}{fileExtension}";
         var outputFilePath = Path.Combine(outputDirectory, fileIdentifier);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         foreach (var chunkFilePath in chunkFileNames)
