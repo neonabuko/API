@@ -26,11 +26,11 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
     {
         return await Task.Run(async () =>
                 {
-                    var fileName = $"{id}.mp3";
-                    var song = await musicRepository.GetAsync(id);
-                    var songName = song.GetValueOrThrow().Name;
-                    var songNameNoExtension = Path.GetFileNameWithoutExtension(songName);
-                    string path = Path.Combine($"{_musicPath}/{songNameNoExtension}", fileName);
+                    var music = await musicRepository.GetAsync(id);
+                    var musicName = music.GetValueOrThrow().Name;
+                    var musicNameNoExtension = Path.GetFileNameWithoutExtension(musicName);
+                    var files = Directory.GetFiles($"{_musicPath}/{musicNameNoExtension}", $"{id}.*");
+                    var path = files[0];
                     if (!File.Exists(path))
                     {
                         throw new FileNotFoundException("File not found", path);
@@ -57,7 +57,7 @@ public class MusicService<T>(IMusicRepository<T> musicRepository, string _musicP
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
-        }        
+        }
         var outputFilePath = Path.Combine($"{_musicPath}/{nameNoExtension}", name);
         await using var outputFileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write);
         var byteData = Encoding.UTF8.GetBytes(content);

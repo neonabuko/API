@@ -26,6 +26,13 @@ public class ScoreController(ScoreService scoreService, ScoreRules scoreRules) :
         return Ok(score.AsViewDto());
     }
 
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetByIdAsync(int id)
+    {
+        var score = await scoreService.GetFileByIdAsync(id);
+        return Ok(score);
+    }
+
     [HttpPost("data")]
     public async Task<IActionResult> SaveDataAsync([FromForm] ScoreDto dto)
     {
